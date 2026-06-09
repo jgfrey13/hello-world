@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketplace
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Optional: run the full app in a container. Requires `docker compose --profile app up`.
+  app:
+    profiles: ['app']
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/marketplace?schema=public
+      JWT_SECRET: please-change-me-in-production
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGINS: http://localhost:3000
+      STORAGE_DRIVER: local
+      MAIL_DRIVER: console
+    ports:
+      - '3000:3000'
+
+volumes:
+  pgdata:

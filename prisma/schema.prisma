@@ -1,0 +1,238 @@
+// Prisma schema for the Home Improvement Bidding Marketplace
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  HOMEOWNER
+  CONTRACTOR
+  ADMIN
+}
+
+enum ProjectCategory {
+  PLUMBING
+  HVAC
+  ROOFING
+  ELECTRICAL
+  PAINTING
+  LANDSCAPING
+  CARPENTRY
+  FLOORING
+  REMODELING
+  GENERAL
+}
+
+enum ProjectStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  FLAGGED
+}
+
+enum Urgency {
+  EMERGENCY
+  WITHIN_WEEK
+  WITHIN_MONTH
+  FLEXIBLE
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role     @default(HOMEOWNER)
+  emailVerified Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  profile Profile?
+
+  projects      Project[] @relation("HomeownerProjects")
+  bids          Bid[]     @relation("ContractorBids")
+  sentMessages  Message[] @relation("SentMessages")
+  recvMessages  Message[] @relation("ReceivedMessages")
+  reviewsGiven  Review[]  @relation("ReviewsGiven")
+  reviewsRecv   Review[]  @relation("ReviewsReceived")
+  tokens        Token[]
+
+  @@index([role])
+  @@map("users")
+}
+
+// Verification / password-reset tokens (hashed before storage).
+model Token {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  type      String // "EMAIL_VERIFY" | "PASSWORD_RESET"
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("tokens")
+}
+
+model Profile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  // Contractor-specific fields (nullable for homeowners)
+  businessName String?
+  licenseNum   String?
+  bio          String?
+  serviceRadiusMiles Int?
+  categories   ProjectCategory[] @default([])
+  // Location
+  city         String?
+  zip          String?
+  // Aggregated rating (denormalized for fast reads), updated on new reviews
+  ratingAvg    Float    @default(0)
+  ratingCount  Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([zip])
+  @@map("profiles")
+}
+
+model Project {
+  id            String          @id @default(cuid())
+  homeownerId   String
+  homeowner     User            @relation("HomeownerProjects", fields: [homeownerId], references: [id], onDelete: Cascade)
+  title         String
+  description   String
+  category      ProjectCategory
+  status        ProjectStatus   @default(OPEN)
+  urgency       Urgency         @default(FLEXIBLE)
+  // Budget range; null means "request quotes"
+  budgetMin     Int?
+  budgetMax     Int?
+  requestQuotes Boolean         @default(false)
+  // Location
+  city          String
+  zip           String
+  // Moderation
+  isFlagged     Boolean         @default(false)
+  flagReason    String?
+  // Set when a bid is accepted
+  acceptedBidId String?         @unique
+  homeownerDone Boolean         @default(false)
+  contractorDone Boolean        @default(false)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  media    ProjectMedia[]
+  bids     Bid[]
+  messages Message[]
+  reviews  Review[]
+
+  @@index([status])
+  @@index([category])
+  @@index([zip])
+  @@index([homeownerId])
+  @@map("projects")
+}
+
+model ProjectMedia {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileKey   String // storage key (for deletion)
+  type      MediaType @default(IMAGE)
+  createdAt DateTime  @default(now())
+
+  @@index([projectId])
+  @@map("project_media")
+}
+
+model Bid {
+  id             String    @id @default(cuid())
+  projectId      String
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contractorId   String
+  contractor     User      @relation("ContractorBids", fields: [contractorId], references: [id], onDelete: Cascade)
+  amount         Int // whole US dollars
+  startDate      DateTime
+  completionDate DateTime
+  proposalText   String
+  status         BidStatus @default(PENDING)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // A contractor may only bid once per project.
+  @@unique([projectId, contractorId])
+  @@index([projectId])
+  @@index([contractorId])
+  @@index([status])
+  @@map("bids")
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  body        String
+  attachmentUrl String?
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@map("messages")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  revieweeId String
+  reviewee   User     @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+  rating     Int // 1..5
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  // One review per project per reviewer.
+  @@unique([projectId, reviewerId])
+  @@index([revieweeId])
+  @@map("reviews")
+}
