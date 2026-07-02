@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { after } from "next/server";
+import { recordEvent } from "@/lib/analytics/events";
 import { ShoppingCart } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +56,17 @@ export default async function ProductPage({
   if (!detail) notFound();
 
   const { product, brand, category, evidence, related, alternatives } = detail;
+
+  if (product.status === "published") {
+    after(() =>
+      recordEvent({
+        type: "product_view",
+        brandId: product.brand_id,
+        productId: product.id,
+        path: `/products/${slug}`,
+      }),
+    );
+  }
   const price = formatPrice(product.price_amount, product.price_is_approximate);
   const priceVerified = formatDate(product.price_verified_at);
   const lastReviewed = formatDate(product.last_reviewed_at);

@@ -64,6 +64,11 @@ export default async function ClaimProfilePage({
 
       <div className="mt-8 space-y-6">
         <FormStatusBanner status={status} />
+        {status === "bad_file" && (
+          <p role="alert" className="text-destructive text-sm">
+            Proof files must be JPEG, PNG, WebP, or PDF and at most 10 MB.
+          </p>
+        )}
 
         <form
           action={submitClaimAction}
@@ -122,10 +127,20 @@ export default async function ClaimProfilePage({
               How are you affiliated with this brand?
             </Label>
             <Textarea id="claim-comments" name="comments" maxLength={5000} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="claim-proof">Proof of affiliation (optional)</Label>
+            <Input
+              id="claim-proof"
+              name="proof"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+            />
             <p className="text-muted-foreground text-xs">
-              Document uploads for proof of affiliation arrive with the brand
-              dashboard; for now, describe your role and we may follow up by
-              email. Never include passwords or payment details.
+              A business card, letterhead, or dashboard screenshot
+              (JPEG/PNG/WebP/PDF, max 10 MB). Stored privately, visible only to
+              you and our review team. Never include passwords or payment
+              details.
             </p>
           </div>
           <Button type="submit">Request access</Button>

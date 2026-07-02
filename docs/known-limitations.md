@@ -1,9 +1,30 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 5 complete)
+## Current status (Phase 6 complete)
 
-Phases 0–5 are done. On top of the foundation, tested-RLS data layer, public
-directory, and editorial content, the administrative workflows now exist:
+Phases 0–6 are done. Phase 6 adds the brand-owner dashboard:
+
+- **/brand-dashboard** (sign-in required; visibility driven entirely by
+  brand_owners grants via RLS): owned-brand overview; per-brand page with
+  real 30-day analytics counts (profile views, product views, outbound
+  clicks — brand/product views are now recorded first-party on published
+  pages, fire-and-forget, no visitor PII), subscription tier display (with
+  the paid-content firewall restated), product list with classifications.
+- **Owner submissions**: propose-profile-update and submit-new-product
+  forms create pending proposed_changes. The payload whitelists are shared
+  schemas between the owner forms and the admin apply step (unit-tested to
+  reject classification/status/verification/billing keys), and product_new
+  approvals create a _draft_ product with classification awaiting_review.
+- **Media**: owners upload logo/hero (server-validated MIME/size, stored
+  under the brand's folder in the public bucket, audited); logos render on
+  brand profiles via next/image. Claim proof uploads are live too (private
+  claim-proofs bucket, RLS-scoped to the uploader's folder, admin-read).
+- Header shows account state (sign in / dashboards / sign out).
+
+Earlier-phase summary: docs/config; app foundation; 22-table schema with
+tested RLS + integrity triggers + audit log; public directory on Postgres
+full-text search; editorial content with disclosures and article SEO; admin
+review queues and CRUD; live public intake forms with rate limiting.
 
 - **Public forms are live**: submit-a-brand and corrections (validated,
   DB-backed rate limiting + honeypot, service-role inserts into pending
@@ -29,9 +50,13 @@ directory, and editorial content, the administrative workflows now exist:
 
 Current limitations (replaced in later phases):
 
-- Newsletter signup stays an honest disabled state until Phase 8; claim
-  proof-file uploads arrive with the brand dashboard (Phase 6) — claims
-  currently use a description of affiliation instead.
+- Newsletter signup stays an honest disabled state until Phase 8.
+- Page-view analytics count every render of a published page (no bot
+  filtering or session dedup yet) — owner metrics are honest raw counts,
+  labeled as such. Refine in the analytics pass.
+- The header reads session state, so previously-static pages (methodology,
+  pricing, policies) now render dynamically; revisit with the caching
+  strategy in Phase 10.
 - Admin flows are enforced at three layers (middleware, per-action role
   checks, RLS — the latter integration-tested), but browser-level e2e for
   the admin UI lands in Phase 10 with Playwright.

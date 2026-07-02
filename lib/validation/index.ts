@@ -242,3 +242,56 @@ export const sponsorshipUpsertSchema = z.object({
   amount: optionalMoney(10000000),
 });
 export type SponsorshipUpsertInput = z.infer<typeof sponsorshipUpsertSchema>;
+
+// ---------------------------------------------------------------------------
+// Proposed-change payloads (Phase 6)
+// Shared by the brand-owner submission forms AND the admin apply step, so a
+// proposal that validates on submit is guaranteed applyable on approval.
+// Strict schemas: classification/status/evidence/billing keys are rejected.
+// ---------------------------------------------------------------------------
+
+export const proposedBrandChangeSchema = z
+  .object({
+    summary: z.string().trim().min(1).max(500).optional(),
+    full_description: z.string().trim().min(1).max(10000).optional(),
+    website_url: z.string().trim().url().max(2048).optional(),
+    founder_names: z.string().trim().min(1).max(500).optional(),
+    founded_year: z.coerce.number().int().min(1600).max(2100).optional(),
+    headquarters_city: z.string().trim().min(1).max(120).optional(),
+    headquarters_state: z.string().trim().min(1).max(120).optional(),
+  })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Propose at least one change",
+  });
+export type ProposedBrandChange = z.infer<typeof proposedBrandChangeSchema>;
+
+export const proposedProductChangeSchema = z
+  .object({
+    summary: z.string().trim().min(1).max(500).optional(),
+    description: z.string().trim().min(1).max(10000).optional(),
+    materials: z.string().trim().min(1).max(1000).optional(),
+    warranty_summary: z.string().trim().min(1).max(1000).optional(),
+    shipping_summary: z.string().trim().min(1).max(1000).optional(),
+    direct_purchase_url: z.string().trim().url().max(2048).optional(),
+    price_amount: z.coerce.number().min(0).max(1000000).optional(),
+  })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "Propose at least one change",
+  });
+export type ProposedProductChange = z.infer<typeof proposedProductChangeSchema>;
+
+/** Owner-proposed NEW product: descriptive fields only. It is created as a
+ * draft with classification 'awaiting_review' — never with a claim. */
+export const proposedNewProductSchema = z
+  .object({
+    name: z.string().trim().min(1).max(200),
+    summary: z.string().trim().min(1).max(500).optional(),
+    description: z.string().trim().min(1).max(10000).optional(),
+    materials: z.string().trim().min(1).max(1000).optional(),
+    price_amount: z.coerce.number().min(0).max(1000000).optional(),
+    direct_purchase_url: z.string().trim().url().max(2048).optional(),
+  })
+  .strict();
+export type ProposedNewProduct = z.infer<typeof proposedNewProductSchema>;

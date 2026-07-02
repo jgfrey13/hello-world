@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Image from "next/image";
+import { after } from "next/server";
+import { recordEvent } from "@/lib/analytics/events";
+import { brandMediaUrl } from "@/lib/storage";
 import { ExternalLink, MapPin } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +73,16 @@ export default async function BrandProfilePage({
   const guides = await getArticlesForBrand(brand.id);
   const lastReviewed = formatDate(brand.last_reviewed_at);
 
+  if (brand.status === "published") {
+    after(() =>
+      recordEvent({
+        type: "brand_view",
+        brandId: brand.id,
+        path: `/brands/${slug}`,
+      }),
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <Breadcrumbs
@@ -93,6 +107,15 @@ export default async function BrandProfilePage({
 
       {/* Header */}
       <header className="max-w-3xl">
+        {brandMediaUrl(brand.logo_path) && (
+          <Image
+            src={brandMediaUrl(brand.logo_path)!}
+            alt={`${brand.name} logo`}
+            width={96}
+            height={96}
+            className="mb-4 rounded-md border object-contain"
+          />
+        )}
         <div className="flex flex-wrap items-center gap-2">
           {brand.verification_status === "approved" && <VerificationBadge />}
           {brand.is_sponsored && <SponsoredBadge />}
