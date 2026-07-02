@@ -1,35 +1,45 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 4 complete)
+## Current status (Phase 5 complete)
 
-Phases 0–4 are done: docs/config, the application foundation, the database &
-authentication layer (21 tables with tested RLS, integrity triggers, audit
-log, storage policies, generated types, auth flows, fictional seed), the
-public directory on real data (full-text search, filters, pagination,
-brand/product/category detail pages, honest per-product classification
-display), and now editorial content:
+Phases 0–5 are done. On top of the foundation, tested-RLS data layer, public
+directory, and editorial content, the administrative workflows now exist:
 
-- Article detail pages: shopping guides at `/guides/[slug]`, stories and
-  other editorial at `/articles/[slug]`, with a permanent redirect keeping
-  one canonical URL per article.
-- Shared article renderer: type label, author/published/updated line,
-  linked products with editorial "best for" labels, brands mentioned,
-  related reading. Body is stored as plain text and rendered as paragraphs
-  — no raw-HTML injection surface.
-- Disclosures as components: conspicuous sponsor disclosure (with sponsor
-  name/link) on every sponsored article, affiliate disclosure whenever
-  required — and sponsorship is disclosed in structured data too.
-- SEO: editable seo_title/seo_description columns drive metadata, canonical
-  URLs, Open Graph article tags, and Article JSON-LD; unpublished records
-  are always noindex.
-- Vitest: 47 tests green (unit + RLS integration).
+- **Public forms are live**: submit-a-brand and corrections (validated,
+  DB-backed rate limiting + honeypot, service-role inserts into pending
+  queues — the public has no direct table access), and profile claims
+  (authentication required; RLS guarantees own/pending-only; duplicate
+  pending claims blocked; a claim grants nothing by itself).
+- **/admin** (editor/admin gated in middleware + layout + per-action role
+  checks, RLS underneath): dashboard with real live counts; brands,
+  products, categories, and articles CRUD (drafts by editors; publishing,
+  archiving, verification, and classification changes admin-only with
+  confirmation dialogs); evidence-review queue (approval requires a source
+  and records the reviewer — DB-enforced); claims review (approval creates
+  the brand_owners grant and upgrades the claimant role — the only access
+  path); brand-submission review (approval creates a _draft_ brand, never a
+  published one); corrections queue; proposed-changes review (approval
+  applies a strict whitelist of descriptive fields — classification/status/
+  evidence fields can never be applied); sponsorship records; newsletter
+  and audit-log views.
+- **Audit logging** on every sensitive action (publish/archive, evidence
+  decisions, claims, classification changes, role-affecting approvals).
+- Vitest: 49 tests green (unit + RLS integration incl. rate-limit table
+  privacy).
 
 Current limitations (replaced in later phases):
 
-- Form shells stay disabled until their server actions land (Phases 5/8).
+- Newsletter signup stays an honest disabled state until Phase 8; claim
+  proof-file uploads arrive with the brand dashboard (Phase 6) — claims
+  currently use a description of affiliation instead.
+- Admin flows are enforced at three layers (middleware, per-action role
+  checks, RLS — the latter integration-tested), but browser-level e2e for
+  the admin UI lands in Phase 10 with Playwright.
+- Rate limiting keys on a salted hash of the caller IP with a DB-backed
+  sliding window; tune window/limits via env. A scheduled job should call
+  prune_rate_limit_events() periodically (Phase 9 job framework).
 - Articles have no dedicated sources field yet; sources are cited through
-  linked evidence and in-body references. Revisit with the editorial
-  workflow (Phase 5).
+  linked evidence and in-body references.
 - Purchase buttons link to stored destinations directly (with disclosure);
   the tracked `/go/[slug]` redirect replaces them in Phase 7.
 - "Relevance" sort currently means featured-first + name; true `ts_rank`

@@ -42,3 +42,17 @@ describe("server env validation", () => {
     ).toBe(false);
   });
 });
+
+describe("isSpamSubmission (honeypot)", () => {
+  it("flags submissions that fill the trap field", async () => {
+    const { isSpamSubmission } = await import("@/lib/security/rate-limit");
+    const spam = new FormData();
+    spam.set("website2", "http://spam.example");
+    expect(isSpamSubmission(spam)).toBe(true);
+
+    const human = new FormData();
+    human.set("website2", "");
+    expect(isSpamSubmission(human)).toBe(false);
+    expect(isSpamSubmission(new FormData())).toBe(false);
+  });
+});

@@ -387,3 +387,23 @@ describeDb("row-level security", () => {
     });
   });
 });
+
+// Appended in Phase 5: the rate-limit table must never be publicly readable.
+describeDb("rate_limit_events privacy", () => {
+  let sql: Sql;
+  beforeAll(() => {
+    sql = postgres(databaseUrl!, { max: 1, onnotice: () => {} });
+  });
+  afterAll(async () => {
+    await sql?.end();
+  });
+
+  it("is invisible to anon and authenticated users", async () => {
+    await withRollback(sql, async (tx) => {
+      await tx`insert into public.rate_limit_events (bucket, key_hash) values ('t', 'h')`;
+      await impersonate(tx, "anon");
+      const rows = await tx`select * from public.rate_limit_events`;
+      expect(rows.length).toBe(0);
+    });
+  });
+});

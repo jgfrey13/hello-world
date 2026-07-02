@@ -1089,6 +1089,27 @@ export type Database = {
           },
         ];
       };
+      rate_limit_events: {
+        Row: {
+          bucket: string;
+          id: string;
+          key_hash: string;
+          occurred_at: string;
+        };
+        Insert: {
+          bucket: string;
+          id?: string;
+          key_hash: string;
+          occurred_at?: string;
+        };
+        Update: {
+          bucket?: string;
+          id?: string;
+          key_hash?: string;
+          occurred_at?: string;
+        };
+        Relationships: [];
+      };
       sponsorships: {
         Row: {
           amount: number | null;
@@ -1269,6 +1290,10 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean };
       is_editor_or_admin: { Args: never; Returns: boolean };
       is_owner_of_brand: { Args: { target_brand: string }; Returns: boolean };
+      prune_rate_limit_events: {
+        Args: { older_than: string };
+        Returns: undefined;
+      };
       request_is_api: { Args: never; Returns: boolean };
     };
     Enums: {

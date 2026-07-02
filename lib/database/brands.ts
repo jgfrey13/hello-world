@@ -254,3 +254,17 @@ export async function getBrandBySlug(
     classificationCounts,
   };
 }
+
+/** Published brands selectable in the claim form (id + name only). */
+export async function getClaimableBrands(): Promise<
+  { id: string; name: string; slug: string }[]
+> {
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase
+    .from("brands")
+    .select("id, name, slug")
+    .eq("status", "published")
+    .order("name");
+  if (error) throw new Error(`getClaimableBrands failed: ${error.message}`);
+  return data ?? [];
+}

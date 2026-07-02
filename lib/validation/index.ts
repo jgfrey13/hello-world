@@ -73,3 +73,172 @@ export const signupSchema = loginSchema.extend({
   fullName: trimmedString(200).optional(),
 });
 export type SignupInput = z.infer<typeof signupSchema>;
+
+// ---------------------------------------------------------------------------
+// Admin CRUD schemas (Phase 5)
+// ---------------------------------------------------------------------------
+
+export const slugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Lowercase letters, numbers, hyphens")
+  .max(200);
+
+const optionalTrimmed = (max: number) =>
+  z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    trimmedString(max).optional(),
+  );
+
+const optionalUrl = z.preprocess(
+  (value) => (value === "" || value === null ? undefined : value),
+  z.string().trim().url().max(2048).optional(),
+);
+
+const emptyToUndefined = (value: unknown) =>
+  value === "" || value === null ? undefined : value;
+
+const optionalInt = (min: number, max: number) =>
+  z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().int().min(min).max(max).optional(),
+  );
+
+const optionalMoney = (max: number) =>
+  z.preprocess(emptyToUndefined, z.coerce.number().min(0).max(max).optional());
+
+const checkbox = z.preprocess(
+  (value) => value === "on" || value === true,
+  z.boolean(),
+);
+
+export const brandUpsertSchema = z.object({
+  name: trimmedString(200),
+  slug: slugSchema,
+  legalName: optionalTrimmed(200),
+  summary: optionalTrimmed(500),
+  fullDescription: optionalTrimmed(10000),
+  websiteUrl: optionalUrl,
+  foundedYear: optionalInt(1600, 2100),
+  founderNames: optionalTrimmed(500),
+  headquartersCity: optionalTrimmed(120),
+  headquartersState: optionalTrimmed(120),
+  priceLevel: optionalInt(1, 3),
+  isFeatured: checkbox,
+  isSponsored: checkbox,
+});
+export type BrandUpsertInput = z.infer<typeof brandUpsertSchema>;
+
+export const productUpsertSchema = z.object({
+  brandId: z.string().uuid(),
+  categoryId: z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    z.string().uuid().optional(),
+  ),
+  name: trimmedString(200),
+  slug: slugSchema,
+  summary: optionalTrimmed(500),
+  description: optionalTrimmed(10000),
+  priceAmount: optionalMoney(1000000),
+  priceIsApproximate: checkbox,
+  directPurchaseUrl: optionalUrl,
+  affiliateUrl: optionalUrl,
+  affiliateNetwork: optionalTrimmed(120),
+  manufacturingCity: optionalTrimmed(120),
+  manufacturingState: optionalTrimmed(120),
+  manufacturingCountry: optionalTrimmed(120),
+  materials: optionalTrimmed(1000),
+  importedComponentsNote: optionalTrimmed(1000),
+  warrantySummary: optionalTrimmed(1000),
+  shippingSummary: optionalTrimmed(1000),
+  isFeatured: checkbox,
+  isSponsored: checkbox,
+});
+export type ProductUpsertInput = z.infer<typeof productUpsertSchema>;
+
+export const categoryUpsertSchema = z.object({
+  name: trimmedString(120),
+  slug: slugSchema,
+  description: optionalTrimmed(500),
+  displayOrder: optionalInt(0, 10000),
+  isActive: checkbox,
+});
+export type CategoryUpsertInput = z.infer<typeof categoryUpsertSchema>;
+
+export const articleUpsertSchema = z.object({
+  title: trimmedString(300),
+  slug: slugSchema,
+  excerpt: optionalTrimmed(500),
+  body: optionalTrimmed(100000),
+  articleType: z.enum([
+    "shopping_guide",
+    "brand_story",
+    "founder_story",
+    "factory_story",
+    "comparison",
+    "buying_guide",
+    "news",
+  ]),
+  isSponsored: checkbox,
+  sponsorBrandId: z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    z.string().uuid().optional(),
+  ),
+  affiliateDisclosureRequired: checkbox,
+  seoTitle: optionalTrimmed(200),
+  seoDescription: optionalTrimmed(300),
+});
+export type ArticleUpsertInput = z.infer<typeof articleUpsertSchema>;
+
+export const evidenceUpsertSchema = z.object({
+  brandId: z.string().uuid(),
+  productId: z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    z.string().uuid().optional(),
+  ),
+  classification: z.enum([
+    "verified_made_in_usa",
+    "brand_reported_made_in_usa",
+    "made_in_usa_imported_components",
+    "assembled_in_usa",
+    "certain_products_made_in_usa",
+    "designed_in_usa_manufactured_elsewhere",
+    "us_owned_unconfirmed_manufacturing",
+    "unclear",
+    "awaiting_review",
+  ]),
+  sourceUrl: optionalUrl,
+  sourceTitle: optionalTrimmed(300),
+  evidenceNote: optionalTrimmed(5000),
+  evidenceType: z.enum([
+    "brand_statement",
+    "product_page",
+    "factory_documentation",
+    "press_coverage",
+    "regulatory_filing",
+    "third_party_audit",
+    "direct_correspondence",
+    "other",
+  ]),
+  confidenceScore: optionalInt(0, 100),
+  internalNotes: optionalTrimmed(5000),
+});
+export type EvidenceUpsertInput = z.infer<typeof evidenceUpsertSchema>;
+
+export const sponsorshipUpsertSchema = z.object({
+  brandId: z.string().uuid(),
+  placementType: trimmedString(120),
+  placementLocation: optionalTrimmed(200),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endDate: z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+  ),
+  disclosureText: optionalTrimmed(500),
+  amount: optionalMoney(10000000),
+});
+export type SponsorshipUpsertInput = z.infer<typeof sponsorshipUpsertSchema>;
