@@ -40,6 +40,13 @@ const sections: {
     ],
   },
   {
+    heading: "Data",
+    links: [
+      { href: "/admin/import", label: "CSV import", adminOnly: true },
+      { href: "/admin/research", label: "Research queue" },
+    ],
+  },
+  {
     heading: "System",
     links: [{ href: "/admin/audit", label: "Audit log", adminOnly: true }],
   },

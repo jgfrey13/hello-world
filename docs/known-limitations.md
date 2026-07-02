@@ -1,8 +1,32 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 8 complete)
+## Current status (Phase 9 complete)
 
-Phases 0–8 are done. Phase 8 adds newsletter capture + notifications:
+Phases 0–9 are done. Phase 9 adds the data-ingestion foundation:
+
+- **CSV import (admin)**: brands CSV → parse (dependency-free RFC-4180
+  parser, unit-tested) → per-row validation preview (ok / listed issues)
+  stored as a pending import job → explicit commit creates DRAFT brands
+  only (invalid rows skipped; commit-time collisions skipped, not fatal);
+  discard supported; size/row caps; audited. No manufacturing claims are
+  ever created from an import.
+- **Duplicate detection**: normalized-domain + slug collision checks
+  against existing brands and within the file (unit-tested).
+- **Research pipeline**: ingestion_records with the full status enum
+  (discovered → … → published/rejected/failed); staff add source URLs +
+  research notes and move records through manual transitions. AI output is
+  never evidence; records carry sources for humans.
+- **Scheduled jobs**: POST /api/jobs/{name} secured by a timing-safe
+  CRON_SECRET bearer check (401 without/with wrong token — runtime
+  verified; jobs disabled until the secret is set). Registered jobs:
+  prune_rate_limits (7-day retention) and check_links (bounded batch of 25
+  published products per run, HEAD with GET fallback, results to
+  link_check_results for staff review on /admin/research — nothing is
+  auto-archived from a failed check).
+- No autonomous scraping exists anywhere — deliberately excluded from MVP.
+- Vitest: 90 tests green.
+
+Phase 8 summary (newsletter + notifications):
 
 - **Newsletter signup is live** (footer form, useActionState inline
   states): honeypot + DB rate limit, consent timestamp + source recorded,

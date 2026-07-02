@@ -694,6 +694,139 @@ export type Database = {
           },
         ];
       };
+      import_jobs: {
+        Row: {
+          committed_at: string | null;
+          committed_count: number;
+          created_at: string;
+          created_by: string | null;
+          entity: string;
+          filename: string;
+          id: string;
+          row_count: number;
+          rows: Json;
+          status: Database["public"]["Enums"]["import_job_status"];
+          updated_at: string;
+          valid_count: number;
+        };
+        Insert: {
+          committed_at?: string | null;
+          committed_count?: number;
+          created_at?: string;
+          created_by?: string | null;
+          entity?: string;
+          filename: string;
+          id?: string;
+          row_count?: number;
+          rows?: Json;
+          status?: Database["public"]["Enums"]["import_job_status"];
+          updated_at?: string;
+          valid_count?: number;
+        };
+        Update: {
+          committed_at?: string | null;
+          committed_count?: number;
+          created_at?: string;
+          created_by?: string | null;
+          entity?: string;
+          filename?: string;
+          id?: string;
+          row_count?: number;
+          rows?: Json;
+          status?: Database["public"]["Enums"]["import_job_status"];
+          updated_at?: string;
+          valid_count?: number;
+        };
+        Relationships: [];
+      };
+      ingestion_records: {
+        Row: {
+          brand_id: string | null;
+          candidate_name: string | null;
+          created_at: string;
+          created_by: string | null;
+          field_confidence: Json | null;
+          id: string;
+          last_checked_at: string | null;
+          normalized_domain: string | null;
+          source_note: string | null;
+          source_url: string;
+          status: Database["public"]["Enums"]["ingestion_status"];
+          updated_at: string;
+        };
+        Insert: {
+          brand_id?: string | null;
+          candidate_name?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          field_confidence?: Json | null;
+          id?: string;
+          last_checked_at?: string | null;
+          normalized_domain?: string | null;
+          source_note?: string | null;
+          source_url: string;
+          status?: Database["public"]["Enums"]["ingestion_status"];
+          updated_at?: string;
+        };
+        Update: {
+          brand_id?: string | null;
+          candidate_name?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          field_confidence?: Json | null;
+          id?: string;
+          last_checked_at?: string | null;
+          normalized_domain?: string | null;
+          source_note?: string | null;
+          source_url?: string;
+          status?: Database["public"]["Enums"]["ingestion_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "ingestion_records_brand_id_fkey";
+            columns: ["brand_id"];
+            isOneToOne: false;
+            referencedRelation: "brands";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      link_check_results: {
+        Row: {
+          checked_at: string;
+          id: string;
+          ok: boolean;
+          product_id: string | null;
+          status_code: number | null;
+          url: string;
+        };
+        Insert: {
+          checked_at?: string;
+          id?: string;
+          ok: boolean;
+          product_id?: string | null;
+          status_code?: number | null;
+          url: string;
+        };
+        Update: {
+          checked_at?: string;
+          id?: string;
+          ok?: boolean;
+          product_id?: string | null;
+          status_code?: number | null;
+          url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "link_check_results_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       manufacturing_evidence: {
         Row: {
           accessed_at: string | null;
@@ -1346,6 +1479,20 @@ export type Database = {
         | "third_party_audit"
         | "direct_correspondence"
         | "other";
+      import_job_status: "pending_review" | "committed" | "discarded";
+      ingestion_status:
+        | "discovered"
+        | "queued"
+        | "fetched"
+        | "extracted"
+        | "normalized"
+        | "matched"
+        | "drafted"
+        | "needs_review"
+        | "approved"
+        | "published"
+        | "rejected"
+        | "failed";
       location_type:
         | "factory"
         | "workshop"
@@ -1544,6 +1691,21 @@ export const Constants = {
         "third_party_audit",
         "direct_correspondence",
         "other",
+      ],
+      import_job_status: ["pending_review", "committed", "discarded"],
+      ingestion_status: [
+        "discovered",
+        "queued",
+        "fetched",
+        "extracted",
+        "normalized",
+        "matched",
+        "drafted",
+        "needs_review",
+        "approved",
+        "published",
+        "rejected",
+        "failed",
       ],
       location_type: [
         "factory",
