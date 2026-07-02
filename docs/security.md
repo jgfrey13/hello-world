@@ -15,18 +15,18 @@ rules; this document is the threat model and control inventory.
 
 ## Threat model (STRIDE-lite) & mitigations
 
-| Threat | Vector | Mitigation |
-|---|---|---|
-| Privilege escalation | User sets own `role` | Role writes admin-only; RLS forbids self-update of role; audited. |
-| IDOR | Guessing brand/product/claim ids | Authorization checks on every object access; RLS row ownership. |
-| Draft/PII leakage | Reading unpublished rows, internal notes | RLS restricts anon to `published`; internal notes/evidence never anon-readable. |
-| Unsafe redirect | `/go/[slug]` open redirect | Destination validated + allowlisted; malformed rejected. |
-| Injection (SQL/XSS) | Form input, user content | Parameterized queries; Zod validation; output encoding; no raw HTML. |
-| Webhook spoofing | Fake Stripe events | Signature verification + idempotency keys. |
-| Malicious upload | Bad MIME/oversized files | MIME + size limits; scoped Storage policies; no trust of client content-type. |
-| Spam/abuse | Public forms | Rate limiting + honeypot/token. |
-| Secret exposure | Logs, client bundle, repo | Env Zod validation; secrets server-only; `.env*` git-ignored; secrets redacted from logs. |
-| Paid-influence integrity | Buying a classification | Classification/evidence admin-only, independent of billing. |
+| Threat                   | Vector                                   | Mitigation                                                                                |
+| ------------------------ | ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Privilege escalation     | User sets own `role`                     | Role writes admin-only; RLS forbids self-update of role; audited.                         |
+| IDOR                     | Guessing brand/product/claim ids         | Authorization checks on every object access; RLS row ownership.                           |
+| Draft/PII leakage        | Reading unpublished rows, internal notes | RLS restricts anon to `published`; internal notes/evidence never anon-readable.           |
+| Unsafe redirect          | `/go/[slug]` open redirect               | Destination validated + allowlisted; malformed rejected.                                  |
+| Injection (SQL/XSS)      | Form input, user content                 | Parameterized queries; Zod validation; output encoding; no raw HTML.                      |
+| Webhook spoofing         | Fake Stripe events                       | Signature verification + idempotency keys.                                                |
+| Malicious upload         | Bad MIME/oversized files                 | MIME + size limits; scoped Storage policies; no trust of client content-type.             |
+| Spam/abuse               | Public forms                             | Rate limiting + honeypot/token.                                                           |
+| Secret exposure          | Logs, client bundle, repo                | Env Zod validation; secrets server-only; `.env*` git-ignored; secrets redacted from logs. |
+| Paid-influence integrity | Buying a classification                  | Classification/evidence admin-only, independent of billing.                               |
 
 ## Control inventory
 

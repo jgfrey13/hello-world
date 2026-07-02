@@ -15,6 +15,7 @@ route to `needs_review`; nothing auto-publishes conflicting manufacturing claims
 ## MVP scope (Phase 9)
 
 Implemented in the first release:
+
 - Manual brand entry and manual product entry.
 - **CSV import with preview + validation** (row-level errors shown before commit).
 - Source-URL and research-note entry.

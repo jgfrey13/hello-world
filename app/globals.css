@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * MadeHere design tokens — the single source of truth for color/type.
+ * Palette: warm ivory bg, deep navy primary, muted brick accent (sparing),
+ * charcoal text, restrained gray borders. All pairings meet WCAG AA.
+ * Do not scatter arbitrary hex values in components; add a token here.
+ */
+:root {
+  --background: #faf8f3; /* warm ivory */
+  --foreground: #29282a; /* charcoal */
+  --card: #fffdf9;
+  --card-foreground: #29282a;
+  --popover: #fffdf9;
+  --popover-foreground: #29282a;
+  --primary: #1c2b4a; /* deep navy */
+  --primary-foreground: #faf8f3;
+  --secondary: #eeeae1; /* ivory-2 for quiet surfaces */
+  --secondary-foreground: #1c2b4a;
+  --muted: #f1ede4;
+  --muted-foreground: #5f5c55; /* AA on ivory */
+  --accent: #93402e; /* muted brick red — use sparingly */
+  --accent-foreground: #faf8f3;
+  --destructive: #8d2f23;
+  --destructive-foreground: #faf8f3;
+  --border: #e4e0d7; /* restrained gray */
+  --input: #d8d3c8;
+  --ring: #1c2b4a;
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-source-serif), Georgia, Cambria, serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: color-mix(in srgb, var(--color-ring) 50%, transparent);
+  }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+  }
+  /* Visible focus everywhere; never remove without replacement. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

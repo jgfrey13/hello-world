@@ -7,11 +7,12 @@ level where possible using the enum in `docs/verification-methodology.md`. Store
 enum values; display human-readable labels.
 
 **Never infer** domestic manufacturing from any of these alone:
+
 - U.S. headquarters
 - American founder / U.S. workers
 - American imagery or a name containing "USA"/"America"
 - "Designed in America"
-- The brand having *some* U.S.-made products
+- The brand having _some_ U.S.-made products
 
 Do not present a mixed-sourcing brand as if all products are domestically made.
 

@@ -9,11 +9,11 @@ we do not fabricate conversion, sales, commission, or partnership data.
 
 ## Primary: paid brand profiles (annual)
 
-| Plan | Placeholder price | Includes |
-|---|---|---|
-| **Basic** | Free | Listing, limited info, limited products, website link, profile-claim access, correction access. |
-| **Verified** | $999/yr (placeholder) | Expanded profile, more products, evidence-review workflow, profile analytics, promotions/discount codes, annual review, verified designation **only when evidence supports it**. |
-| **Featured** | $3,999/yr (placeholder) | Everything in Verified + featured category placement, eligible homepage placement, newsletter/social promotion opportunities, product-launch promotion, enhanced analytics. |
+| Plan         | Placeholder price       | Includes                                                                                                                                                                         |
+| ------------ | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Basic**    | Free                    | Listing, limited info, limited products, website link, profile-claim access, correction access.                                                                                  |
+| **Verified** | $999/yr (placeholder)   | Expanded profile, more products, evidence-review workflow, profile analytics, promotions/discount codes, annual review, verified designation **only when evidence supports it**. |
+| **Featured** | $3,999/yr (placeholder) | Everything in Verified + featured category placement, eligible homepage placement, newsletter/social promotion opportunities, product-launch promotion, enhanced analytics.      |
 
 Prices are placeholders pending approval before production payments.
 

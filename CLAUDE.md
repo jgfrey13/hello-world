@@ -43,6 +43,7 @@ npm run db:types       # regenerate lib/database/types.ts
 npm run db:seed        # load fictional demo data
 npm run db:seed:remove # remove demo data
 ```
+
 (Commands are wired up as their phases land; a command that does not yet exist
 means its phase is not complete.)
 

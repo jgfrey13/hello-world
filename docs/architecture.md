@@ -80,13 +80,13 @@ bottlenecks in `docs/known-limitations.md`.
 See `docs/database.md` for the entity model, this file's structure section for the
 page map, and `.claude/rules/security.md` + the permission matrix below.
 
-| Action | Visitor | Brand owner | Editor | Admin |
-|---|---|---|---|---|
-| Read published records | ✓ | ✓ | ✓ | ✓ |
-| Newsletter / submit brand / correction | ✓ | ✓ | ✓ | ✓ |
-| Claim profile (auth required) | – | ✓ | ✓ | ✓ |
-| Propose brand/product edits (pending) | – | ✓ own | ✓ | ✓ |
-| Manage drafts / recommend publish | – | – | ✓ | ✓ |
-| Publish / edit classification | – | ✗ | ✗ | ✓ |
-| Approve evidence | – | ✗ | ✗ | ✓ |
-| Manage roles / billing metadata | – | ✗ | ✗ | ✓ |
+| Action                                 | Visitor | Brand owner | Editor | Admin |
+| -------------------------------------- | ------- | ----------- | ------ | ----- |
+| Read published records                 | ✓       | ✓           | ✓      | ✓     |
+| Newsletter / submit brand / correction | ✓       | ✓           | ✓      | ✓     |
+| Claim profile (auth required)          | –       | ✓           | ✓      | ✓     |
+| Propose brand/product edits (pending)  | –       | ✓ own       | ✓      | ✓     |
+| Manage drafts / recommend publish      | –       | –           | ✓      | ✓     |
+| Publish / edit classification          | –       | ✗           | ✗      | ✓     |
+| Approve evidence                       | –       | ✗           | ✗      | ✓     |
+| Manage roles / billing metadata        | –       | ✗           | ✗      | ✓     |

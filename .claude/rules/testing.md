@@ -6,6 +6,7 @@ meaningful tests over coverage-padding.
 ## Required coverage areas
 
 **Authorization**
+
 - Visitor cannot read drafts or access admin pages.
 - Brand owner cannot access another brand or alter manufacturing evidence.
 - Editor cannot change administrator roles.
@@ -13,26 +14,32 @@ meaningful tests over coverage-padding.
 - Admin routes require authorization.
 
 **Affiliate redirects**
+
 - Published product redirects correctly; direct-URL fallback works.
 - Unsafe URL rejected; inactive/missing product handled gracefully.
 - Click event is recorded.
 
 **Profile claims**
+
 - Auth required; a claim creates a pending record and grants no immediate access;
   duplicate pending claims handled.
 
 **Manufacturing evidence**
+
 - Evidence requires a source; approval records the reviewer; brand owners cannot
   approve; public pages never expose internal notes.
 
 **Stripe**
+
 - Valid webhook updates subscription; invalid signature rejected; duplicate
   webhook does not double-apply; canceled subscription preserves Basic listing.
 
 **Forms**
+
 - Validation works; spam/rate limits enforced; sensitive data never shown publicly.
 
 **Search**
+
 - Filters return correct results; query params persist; drafts excluded;
   pagination stable.
 

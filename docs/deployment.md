@@ -41,6 +41,7 @@ npm run db:seed        # optional fictional demo data
 ## Production go-live gate
 
 Do not enable production payments or bulk email until:
+
 - Final prices approved.
 - Legal/policy pages reviewed by qualified counsel.
 - Custom domain active.
