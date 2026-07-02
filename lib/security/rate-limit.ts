@@ -18,8 +18,12 @@ async function callerKeyHash(): Promise<string> {
     headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     headerStore.get("x-real-ip") ??
     "unknown";
-  // Salt with the service key so hashes are not globally linkable.
-  const salt = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "rate-limit-salt";
+  // Salt so hashes are not globally linkable; dedicated salt preferred,
+  // service key as fallback.
+  const salt =
+    process.env.RATE_LIMIT_SALT ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    "rate-limit-salt";
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex");
 }
 

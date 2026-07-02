@@ -3,7 +3,8 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 import { FormStatusBanner } from "@/components/forms/form-status-banner";
 import { HoneypotField } from "@/components/forms/honeypot-field";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { SubmitButton } from "@/components/forms/submit-button";
+import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -143,7 +144,7 @@ export default async function ClaimProfilePage({
               details.
             </p>
           </div>
-          <Button type="submit">Request access</Button>
+          <SubmitButton pendingLabel="Submitting…">Request access</SubmitButton>
         </form>
       </div>
     </div>

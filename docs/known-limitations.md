@@ -1,8 +1,55 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 9 complete)
+## Current status (Phase 10 complete — launch-readiness)
 
-Phases 0–9 are done. Phase 9 adds the data-ingestion foundation:
+All ten build phases are done. Phase 10 added launch-readiness work:
+
+- **SEO layer**: robots.ts, quality-gated sitemap.ts (thin records excluded;
+  static fallback if the DB is unreachable at generation time), canonical
+  URLs and indexability thresholds on brand/product pages (thin records
+  render but carry noindex — lib/seo/indexability.ts), Organization and
+  Article JSON-LD (serialized via jsonLdSafe to prevent `</script>`
+  breakout).
+- **Playwright e2e**: axe (WCAG 2.1 A/AA) on the key public pages with zero
+  serious/critical violations, skip-link and mobile-nav keyboard flows, and
+  graceful-degradation checks — all runnable without a database. Six
+  full-stack journey specs run when E2E_BASE_URL points at a seeded stack
+  and skip honestly otherwise.
+- **Dedicated review passes** (database-security-reviewer and
+  frontend-accessibility-reviewer agents) with remediation applied:
+  - Stored-XSS defense in depth: `javascript:` URLs rejected at validation
+    (all shared URL schemas now require http(s)) **and** at every external
+    render sink via `safeHttpUrl` (brand website, evidence sources).
+  - SSRF defense on the link-check job: destinations are re-validated with
+    the same public-https-only rules as /go, redirects are never followed
+    server-side, and the private-host blocklist now covers 172.16–31.
+  - Brand admin-only columns (verification_status, subscription_tier,
+    is_featured, is_sponsored) are now trigger-protected in the database —
+    editors can edit draft content but never those columns (RLS-suite
+    tested); the admin brand form hides placement flags from editors.
+  - Unsubscribe tokens are timestamped and expire after 30 days, and
+    unsubscribing now requires a confirming POST (mail scanners prefetching
+    GET links can no longer unsubscribe anyone). Dedicated
+    UNSUBSCRIBE_SECRET / RATE_LIMIT_SALT env vars supported (service-key
+    fallback preserved).
+  - SVG removed from the public brand-media bucket allowlist (active
+    content in a public bucket); proposed product changes re-verify the
+    product still belongs to the proposal's brand before applying; the
+    local DB shim aborts if it detects a real Supabase database.
+  - Accessibility: footer links now have a visible focus outline on the
+    navy surface; admin gets a mobile navigation drawer; loading.tsx
+    boundaries for home, brand/product profiles, admin, and the brand
+    dashboard; confirmation on the submissions Reject action; sr-only
+    results headings on directory grids; "(opens in new tab)" announced on
+    external links; unique honeypot ids; Radix description warnings fixed.
+- **Accepted/deferred findings** (documented, not blocking): field-level
+  error association + form repopulation on public intake forms (forms
+  currently use accessible page-level status banners; per-field
+  `aria-describedby` error wiring is a post-launch refinement), and hint
+  text on some admin fields is not yet programmatically associated via
+  `aria-describedby`.
+
+Phase 9 summary (data-ingestion foundation):
 
 - **CSV import (admin)**: brands CSV → parse (dependency-free RFC-4180
   parser, unit-tested) → per-row validation preview (ok / listed issues)
@@ -24,7 +71,6 @@ Phases 0–9 are done. Phase 9 adds the data-ingestion foundation:
   link_check_results for staff review on /admin/research — nothing is
   auto-archived from a failed check).
 - No autonomous scraping exists anywhere — deliberately excluded from MVP.
-- Vitest: 90 tests green.
 
 Phase 8 summary (newsletter + notifications):
 

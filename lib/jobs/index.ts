@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { isApprovedDestination } from "@/lib/affiliate/redirect";
 
 /**
  * Scheduled-job registry. Jobs are invoked by POST /api/jobs/[job] with the
@@ -45,12 +46,26 @@ async function checkLinks(): Promise<JobResult> {
   for (const product of products ?? []) {
     const url = product.affiliate_url ?? product.direct_purchase_url;
     if (!url) continue;
+    // SSRF guard: only fetch validated public https destinations, and never
+    // follow redirects server-side (a public URL may redirect to an internal
+    // host). A redirect counts as the link working.
+    if (!isApprovedDestination(url)) {
+      checked++;
+      broken++;
+      await supabase.from("link_check_results").insert({
+        product_id: product.id,
+        url,
+        ok: false,
+        status_code: null,
+      });
+      continue;
+    }
     let ok = false;
     let statusCode: number | null = null;
     try {
       const response = await fetch(url, {
         method: "HEAD",
-        redirect: "follow",
+        redirect: "manual",
         signal: AbortSignal.timeout(LINK_TIMEOUT_MS),
       });
       statusCode = response.status;
@@ -58,13 +73,15 @@ async function checkLinks(): Promise<JobResult> {
       if (response.status === 405 || response.status === 501) {
         const getResponse = await fetch(url, {
           method: "GET",
-          redirect: "follow",
+          redirect: "manual",
           signal: AbortSignal.timeout(LINK_TIMEOUT_MS),
         });
         statusCode = getResponse.status;
-        ok = getResponse.ok;
+        ok =
+          getResponse.ok ||
+          (getResponse.status >= 300 && getResponse.status < 400);
       } else {
-        ok = response.ok;
+        ok = response.ok || (response.status >= 300 && response.status < 400);
       }
     } catch {
       ok = false;

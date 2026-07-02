@@ -84,10 +84,22 @@ export async function reviewProposedChangeAction(formData: FormData) {
         change!.proposed_data,
       );
       if (!payload.success) redirect("/admin/changes?status=unapplyable");
+      // Re-verify the product still belongs to the proposal's brand — a
+      // product re-parented since submission must not receive changes
+      // proposed under its old brand's authority.
+      const { data: target } = await supabase
+        .from("products")
+        .select("brand_id")
+        .eq("id", change!.product_id)
+        .maybeSingle();
+      if (!target || target.brand_id !== change!.brand_id) {
+        redirect("/admin/changes?status=unapplyable");
+      }
       const { error } = await supabase
         .from("products")
         .update(payload.data!)
-        .eq("id", change!.product_id);
+        .eq("id", change!.product_id)
+        .eq("brand_id", change!.brand_id!);
       if (error) redirect("/admin/changes?status=error");
     }
   }

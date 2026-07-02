@@ -3,6 +3,7 @@ import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { jsonLdSafe } from "@/lib/seo/article";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,6 +38,19 @@ export default function RootLayout({
       className={`${inter.variable} ${sourceSerif.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: jsonLdSafe({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "MadeHere",
+              url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+              description:
+                "Evidence-based directory of American-made consumer brands and products.",
+            }),
+          }}
+        />
         <a
           href="#main-content"
           className="focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:px-4 focus:py-2"

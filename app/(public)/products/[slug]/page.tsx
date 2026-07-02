@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { after } from "next/server";
 import { recordEvent } from "@/lib/analytics/events";
+import { productIsIndexable } from "@/lib/seo/indexability";
 import { ShoppingCart } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -27,13 +28,16 @@ export async function generateMetadata({
   const { slug } = await params;
   const detail = await getProductBySlug(slug);
   if (!detail) return {};
+  const indexable =
+    detail.product.status === "published" && productIsIndexable(detail.product);
   return {
     title: `${detail.product.name} by ${detail.brand.name}`,
     description:
       detail.product.summary ??
       `${detail.product.name} — ${classificationLabel(detail.product.manufacturing_classification)}.`,
-    robots:
-      detail.product.status === "published" ? undefined : { index: false },
+    alternates: { canonical: `/products/${slug}` },
+    // Quality gate: thin records render but are not indexed (lib/seo).
+    robots: indexable ? undefined : { index: false },
   };
 }
 
@@ -258,6 +262,7 @@ export default async function ProductPage({
                 >
                   <ShoppingCart aria-hidden="true" />
                   Shop this product
+                  <span className="sr-only"> (opens in new tab)</span>
                 </a>
                 <div className="mt-3">
                   {product.affiliate_url ? (

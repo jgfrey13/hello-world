@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";
 import { FormStatusBanner } from "@/components/forms/form-status-banner";
 import { HoneypotField } from "@/components/forms/honeypot-field";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -136,7 +136,9 @@ export default async function SubmitBrandPage({
             <Label htmlFor="comments">Anything else? (optional)</Label>
             <Textarea id="comments" name="comments" maxLength={5000} />
           </div>
-          <Button type="submit">Submit for review</Button>
+          <SubmitButton pendingLabel="Submitting…">
+            Submit for review
+          </SubmitButton>
           <p className="text-muted-foreground text-xs">
             By submitting you consent to us storing this information to review
             the brand. We never publish your contact details.

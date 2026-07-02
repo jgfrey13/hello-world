@@ -26,7 +26,7 @@ function brandPayload(formData: FormData) {
   });
 }
 
-function toRow(input: z.infer<typeof brandUpsertSchema>) {
+function toRow(input: z.infer<typeof brandUpsertSchema>, isAdmin: boolean) {
   return {
     name: input.name,
     slug: input.slug,
@@ -39,8 +39,11 @@ function toRow(input: z.infer<typeof brandUpsertSchema>) {
     headquarters_city: input.headquartersCity ?? null,
     headquarters_state: input.headquartersState ?? null,
     price_level: input.priceLevel ?? null,
-    is_featured: input.isFeatured,
-    is_sponsored: input.isSponsored,
+    // Placement flags are admin-only (DB trigger enforces this too) — editor
+    // saves simply never touch them.
+    ...(isAdmin
+      ? { is_featured: input.isFeatured, is_sponsored: input.isSponsored }
+      : {}),
   };
 }
 
@@ -61,14 +64,17 @@ async function syncCategories(brandId: string, formData: FormData) {
 }
 
 export async function createBrandAction(formData: FormData) {
-  const { user } = await requireRole("editor");
+  const { user, profile } = await requireRole("editor");
   const parsed = brandPayload(formData);
   if (!parsed.success) redirect("/admin/brands/new?status=invalid");
 
   const supabase = await createSupabaseServerClient();
   const { data: created, error } = await supabase
     .from("brands")
-    .insert({ ...toRow(parsed.data!), status: "draft" })
+    .insert({
+      ...toRow(parsed.data!, profile?.role === "admin"),
+      status: "draft",
+    })
     .select("id")
     .maybeSingle();
   if (error || !created) redirect("/admin/brands/new?status=error");
@@ -87,7 +93,7 @@ export async function createBrandAction(formData: FormData) {
 }
 
 export async function updateBrandAction(formData: FormData) {
-  const { user } = await requireRole("editor");
+  const { user, profile } = await requireRole("editor");
   const id = z.string().uuid().safeParse(formData.get("id"));
   const parsed = brandPayload(formData);
   if (!id.success || !parsed.success) redirect("/admin/brands?status=invalid");
@@ -96,7 +102,7 @@ export async function updateBrandAction(formData: FormData) {
   // RLS: editors can update only unpublished rows; admins anything.
   const { data: updated, error } = await supabase
     .from("brands")
-    .update(toRow(parsed.data!))
+    .update(toRow(parsed.data!, profile?.role === "admin"))
     .eq("id", id.data!)
     .select("id")
     .maybeSingle();

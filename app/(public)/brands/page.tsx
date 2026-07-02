@@ -66,6 +66,7 @@ export default async function BrandsPage({
           />
         ) : (
           <>
+            <h2 className="sr-only">Results</h2>
             <p className="text-muted-foreground text-sm" role="status">
               {results.total} brand{results.total === 1 ? "" : "s"} found
             </p>

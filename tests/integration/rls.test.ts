@@ -310,6 +310,51 @@ describeDb("row-level security", () => {
     });
   });
 
+  it("editors cannot change brand verification, tier, or placement flags", async () => {
+    await withRollback(sql, async (tx) => {
+      await seedFixtures(tx);
+      // Editors may edit draft content, but the admin-only columns are
+      // trigger-protected even on rows they can otherwise update.
+      await tx`insert into public.brands (name, slug, status)
+        values ('Draft B', 'rlstest-draft-b', 'draft')`;
+      await impersonate(tx, "authenticated", EDITOR);
+      await expectDenied(
+        tx,
+        /admin-only/,
+        (sp) => sp`update public.brands set verification_status = 'approved'
+          where slug = 'rlstest-draft-b'`,
+      );
+      await expectDenied(
+        tx,
+        /admin-only/,
+        (sp) => sp`update public.brands set subscription_tier = 'featured'
+          where slug = 'rlstest-draft-b'`,
+      );
+      await expectDenied(
+        tx,
+        /admin-only/,
+        (sp) => sp`update public.brands set is_featured = true
+          where slug = 'rlstest-draft-b'`,
+      );
+      await expectDenied(
+        tx,
+        /admin-only/,
+        (sp) => sp`update public.brands set is_sponsored = true
+          where slug = 'rlstest-draft-b'`,
+      );
+      // Ordinary content edits on the draft still work.
+      const rows = await tx`update public.brands set summary = 'edited'
+        where slug = 'rlstest-draft-b' returning id`;
+      expect(rows.length).toBe(1);
+      // Admins can set the protected columns.
+      await impersonate(tx, "authenticated", ADMIN);
+      const adminRows = await tx`update public.brands
+        set verification_status = 'approved', is_featured = true
+        where slug = 'rlstest-draft-b' returning id`;
+      expect(adminRows.length).toBe(1);
+    });
+  });
+
   it("owners submit proposed changes for their brand only, always pending", async () => {
     await withRollback(sql, async (tx) => {
       const { pubBrand, draftBrand } = await seedFixtures(tx);

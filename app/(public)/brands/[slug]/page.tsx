@@ -5,6 +5,8 @@ import Image from "next/image";
 import { after } from "next/server";
 import { recordEvent } from "@/lib/analytics/events";
 import { brandMediaUrl } from "@/lib/storage";
+import { brandIsIndexable } from "@/lib/seo/indexability";
+import { safeHttpUrl } from "@/lib/security/urls";
 import { ExternalLink, MapPin } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -33,12 +35,16 @@ export async function generateMetadata({
   const { slug } = await params;
   const profile = await getBrandBySlug(slug);
   if (!profile) return {};
+  const indexable =
+    profile.brand.status === "published" && brandIsIndexable(profile.brand);
   return {
     title: `${profile.brand.name} — American-Made Brand Profile`,
     description:
       profile.brand.summary ??
       `Manufacturing evidence and products for ${profile.brand.name}.`,
-    robots: profile.brand.status === "published" ? undefined : { index: false },
+    alternates: { canonical: `/brands/${slug}` },
+    // Quality gate: thin records render but are not indexed (lib/seo).
+    robots: indexable ? undefined : { index: false },
   };
 }
 
@@ -136,14 +142,15 @@ export default async function BrandProfilePage({
             </span>
           )}
           {brand.founded_year && <span>Founded {brand.founded_year}</span>}
-          {brand.website_url && (
+          {safeHttpUrl(brand.website_url) && (
             <a
-              href={brand.website_url}
+              href={safeHttpUrl(brand.website_url)!}
               rel="nofollow noopener"
               target="_blank"
               className="inline-flex items-center gap-1 underline underline-offset-4"
             >
               Website
+              <span className="sr-only"> (opens in new tab)</span>
               <ExternalLink aria-hidden="true" className="size-3.5" />
             </a>
           )}

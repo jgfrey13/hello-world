@@ -1,29 +1,45 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 /**
- * Stateless unsubscribe tokens: HMAC-SHA256 of the normalized email, keyed
- * by a server secret. The token in an email's unsubscribe link proves the
- * bearer received that email — no database round-trip and no guessable ids.
+ * Stateless unsubscribe tokens: `issuedAt.HMAC-SHA256(email + "." + issuedAt)`
+ * keyed by a server secret. The token in an email's unsubscribe link proves
+ * the bearer received that email — no database round-trip and no guessable
+ * ids — and expires so a leaked link is not a permanent capability.
  */
 
+const TOKEN_VALIDITY_SECONDS = 30 * 24 * 60 * 60; // 30 days
+
 function secret(): string {
-  // Server-only secret; the service key doubles as HMAC key material so no
-  // extra env var is needed. Never expose derived tokens' inputs.
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Dedicated secret preferred; the service key remains a fallback so a
+  // rotation of one does not silently invalidate the other's tokens.
+  const key =
+    process.env.UNSUBSCRIBE_SECRET ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key) throw new Error("unsubscribe tokens require server configuration");
   return key;
 }
 
-export function makeUnsubscribeToken(email: string): string {
+function sign(email: string, issuedAt: number): string {
   return createHmac("sha256", secret())
-    .update(email.trim().toLowerCase())
+    .update(`${email.trim().toLowerCase()}.${issuedAt}`)
     .digest("hex");
 }
 
+export function makeUnsubscribeToken(
+  email: string,
+  issuedAt = Math.floor(Date.now() / 1000),
+): string {
+  return `${issuedAt}.${sign(email, issuedAt)}`;
+}
+
 export function verifyUnsubscribeToken(email: string, token: string): boolean {
-  if (!/^[0-9a-f]{64}$/.test(token)) return false;
-  const expected = Buffer.from(makeUnsubscribeToken(email), "hex");
-  const provided = Buffer.from(token, "hex");
+  const match = /^(\d{1,12})\.([0-9a-f]{64})$/.exec(token);
+  if (!match) return false;
+  const issuedAt = Number(match[1]);
+  const now = Math.floor(Date.now() / 1000);
+  if (issuedAt > now + 60) return false; // future-dated tokens are forged
+  if (now - issuedAt > TOKEN_VALIDITY_SECONDS) return false; // expired
+  const expected = Buffer.from(sign(email, issuedAt), "hex");
+  const provided = Buffer.from(match[2], "hex");
   return (
     expected.length === provided.length && timingSafeEqual(expected, provided)
   );

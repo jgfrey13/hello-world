@@ -2,7 +2,6 @@ import { requireRole } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { FormStatusBanner } from "@/components/forms/form-status-banner";
 import { EmptyState } from "@/components/ui/states";
-import { Button } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/admin/confirm-submit-button";
 import { reviewSubmissionAction } from "@/app/admin/submissions/actions";
 
@@ -99,9 +98,14 @@ export default async function AdminSubmissionsPage({
                 <form action={reviewSubmissionAction}>
                   <input type="hidden" name="id" value={submission.id} />
                   <input type="hidden" name="decision" value="rejected" />
-                  <Button type="submit" size="sm" variant="outline">
+                  <ConfirmSubmitButton
+                    size="sm"
+                    variant="outline"
+                    confirmTitle="Reject this submission?"
+                    confirmDescription="The submission is marked rejected and leaves the queue. No brand record is created."
+                  >
                     Reject
-                  </Button>
+                  </ConfirmSubmitButton>
                 </form>
               </div>
             </li>

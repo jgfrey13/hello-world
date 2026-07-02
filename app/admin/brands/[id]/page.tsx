@@ -160,6 +160,7 @@ export default async function EditBrandPage({
           brand={brand}
           categories={categories ?? []}
           selectedCategoryIds={(links ?? []).map((l) => l.category_id)}
+          showAdminFlags={isAdmin}
         />
         <Button type="submit">Save changes</Button>
       </form>

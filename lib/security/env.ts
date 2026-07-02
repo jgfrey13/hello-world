@@ -25,6 +25,11 @@ const serverEnvSchema = publicEnvSchema.extend({
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(1).optional(),
   ADMIN_ALERT_EMAIL: z.string().email().optional(),
+  // Dedicated HMAC/salt secrets. Optional: both fall back to the service-role
+  // key, but set them in production so key rotation doesn't invalidate
+  // unsubscribe links or reshuffle rate-limit buckets.
+  UNSUBSCRIBE_SECRET: z.string().min(16).optional(),
+  RATE_LIMIT_SALT: z.string().min(16).optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;

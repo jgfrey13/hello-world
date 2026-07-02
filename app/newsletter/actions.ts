@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { checkRateLimit, isSpamSubmission } from "@/lib/security/rate-limit";
 import { newsletterSignupSchema } from "@/lib/validation";
@@ -64,12 +65,22 @@ export async function subscribeNewsletterAction(
   return { status: "success" };
 }
 
-/** One-click unsubscribe via HMAC token (from email links). */
-export async function unsubscribeByToken(
-  email: string,
-  token: string,
-): Promise<boolean> {
-  if (!verifyUnsubscribeToken(email, token)) return false;
+/**
+ * Confirmed unsubscribe — POSTed from the confirmation page so that link
+ * prefetchers and email scanners following the GET link can never
+ * unsubscribe anyone. The HMAC token is re-verified server-side here; the
+ * page's GET check is only presentation.
+ */
+export async function confirmUnsubscribeAction(formData: FormData) {
+  const email = formData.get("email");
+  const token = formData.get("token");
+  if (
+    typeof email !== "string" ||
+    typeof token !== "string" ||
+    !verifyUnsubscribeToken(email, token)
+  ) {
+    redirect("/newsletter/unsubscribe");
+  }
   const supabase = createSupabaseServiceClient();
   const { error } = await supabase
     .from("newsletter_subscribers")
@@ -78,5 +89,7 @@ export async function unsubscribeByToken(
       unsubscribed_at: new Date().toISOString(),
     })
     .eq("email", email.trim().toLowerCase());
-  return !error;
+  redirect(
+    error ? "/newsletter/unsubscribe" : "/newsletter/unsubscribe?done=1",
+  );
 }

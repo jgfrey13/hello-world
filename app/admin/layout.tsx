@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { AdminMobileNav } from "@/components/admin/admin-mobile-nav";
+import { sectionsForRole } from "@/components/admin/admin-nav-sections";
 
 export const metadata: Metadata = {
   title: { default: "Admin", template: "%s | MadeHere Admin" },
@@ -20,11 +22,15 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const current = await requireRole("editor");
+  const role = current.profile?.role ?? "editor";
 
   return (
     <div className="mx-auto flex max-w-7xl gap-8 px-4 py-8 sm:px-6">
-      <AdminNav role={current.profile?.role ?? "editor"} />
-      <div className="min-w-0 flex-1">{children}</div>
+      <AdminNav role={role} />
+      <div className="min-w-0 flex-1">
+        <AdminMobileNav sections={sectionsForRole(role)} />
+        {children}
+      </div>
     </div>
   );
 }

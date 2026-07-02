@@ -81,6 +81,11 @@
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
+  /* On navy surfaces the navy ring would vanish — flip to ivory. */
+  footer :focus-visible,
+  .on-dark :focus-visible {
+    outline-color: var(--color-primary-foreground);
+  }
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

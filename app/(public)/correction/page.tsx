@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/ui/page-header";
 import { FormStatusBanner } from "@/components/forms/form-status-banner";
 import { HoneypotField } from "@/components/forms/honeypot-field";
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -88,7 +88,7 @@ export default async function CorrectionPage({
               Only used to follow up on this correction. Never shown publicly.
             </p>
           </div>
-          <Button type="submit">Send correction</Button>
+          <SubmitButton pendingLabel="Sending…">Send correction</SubmitButton>
         </form>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FormStatusBanner } from "@/components/forms/form-status-banner";
+import { SubmitButton } from "@/components/forms/submit-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,7 +71,7 @@ export default async function OwnedBrandPage({
         <h2 id="bd-analytics" className="font-serif text-lg font-semibold">
           Last 30 days
         </h2>
-        <div className="mt-3 grid grid-cols-3 gap-4">
+        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
             { label: "Profile views", value: analytics.profileViews30d },
             { label: "Product views", value: analytics.productViews30d },
@@ -119,26 +120,34 @@ export default async function OwnedBrandPage({
                 <form action={startCheckoutAction}>
                   <input type="hidden" name="brandId" value={brand.id} />
                   <input type="hidden" name="plan" value="verified" />
-                  <Button type="submit" size="sm">
+                  <SubmitButton size="sm" pendingLabel="Opening checkout…">
                     Upgrade to Verified
-                  </Button>
+                  </SubmitButton>
                 </form>
               )}
               {brand.subscription_tier !== "featured" && (
                 <form action={startCheckoutAction}>
                   <input type="hidden" name="brandId" value={brand.id} />
                   <input type="hidden" name="plan" value="featured" />
-                  <Button type="submit" size="sm" variant="outline">
+                  <SubmitButton
+                    size="sm"
+                    variant="outline"
+                    pendingLabel="Opening checkout…"
+                  >
                     Upgrade to Featured
-                  </Button>
+                  </SubmitButton>
                 </form>
               )}
               {subscription && (
                 <form action={openBillingPortalAction}>
                   <input type="hidden" name="brandId" value={brand.id} />
-                  <Button type="submit" size="sm" variant="ghost">
+                  <SubmitButton
+                    size="sm"
+                    variant="ghost"
+                    pendingLabel="Opening…"
+                  >
                     Manage billing
-                  </Button>
+                  </SubmitButton>
                 </form>
               )}
             </div>

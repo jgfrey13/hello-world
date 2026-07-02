@@ -37,11 +37,14 @@ export default async function GuidesPage() {
             description="Shopping guides appear here as our editorial coverage grows."
           />
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {guides.map((guide) => (
-              <GuideCard key={guide.id} guide={guide} />
-            ))}
-          </div>
+          <>
+            <h2 className="sr-only">Guides</h2>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {guides.map((guide) => (
+                <GuideCard key={guide.id} guide={guide} />
+              ))}
+            </div>
+          </>
         )}
         {otherStories.length > 0 && (
           <section aria-labelledby="guides-stories" className="pt-6">

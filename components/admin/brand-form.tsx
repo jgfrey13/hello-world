@@ -11,10 +11,13 @@ export function BrandFormFields({
   brand,
   categories,
   selectedCategoryIds = [],
+  showAdminFlags = false,
 }: {
   brand?: BrandRow;
   categories: { id: string; name: string }[];
   selectedCategoryIds?: string[];
+  /** Placement flags are admin-only; hide them from editor forms. */
+  showAdminFlags?: boolean;
 }) {
   return (
     <div className="space-y-5">
@@ -137,24 +140,26 @@ export function BrandFormFields({
           ))}
         </div>
       </fieldset>
-      <div className="flex flex-wrap gap-x-6 gap-y-2">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="isFeatured"
-            defaultChecked={brand?.is_featured}
-          />
-          Featured
-        </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            name="isSponsored"
-            defaultChecked={brand?.is_sponsored}
-          />
-          Sponsored placement (renders the Sponsored label)
-        </label>
-      </div>
+      {showAdminFlags && (
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="isFeatured"
+              defaultChecked={brand?.is_featured}
+            />
+            Featured
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="isSponsored"
+              defaultChecked={brand?.is_sponsored}
+            />
+            Sponsored placement (renders the Sponsored label)
+          </label>
+        </div>
+      )}
     </div>
   );
 }

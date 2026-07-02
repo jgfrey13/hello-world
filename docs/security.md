@@ -45,3 +45,29 @@ Before the security phase and launch, run the `database-security-reviewer`
 subagent over RLS, privilege escalation, IDOR, redirects, injection, uploads,
 webhooks, auth flows, admin routes, and information leakage. No critical findings
 may remain at launch.
+
+### Phase 10 review — completed
+
+The dedicated pass ran in Phase 10 and every finding was remediated (none
+were accepted-as-risk):
+
+- **H — stored XSS via URL fields**: all shared URL schemas now require
+  http(s), and every external-URL render sink re-checks with
+  `lib/security/urls.ts#safeHttpUrl` (defense in depth against legacy rows).
+- **M — JSON-LD injection**: structured data serialized with `jsonLdSafe`
+  (escapes `<`), closing the `</script>` breakout.
+- **M — SSRF in the link-check job**: destinations re-validated with the
+  /go rules before fetching; server-side redirects never followed; private
+  host blocklist extended to 172.16–31.
+- **M — brand admin-only columns**: `verification_status`,
+  `subscription_tier`, `is_featured`, `is_sponsored` are trigger-protected
+  (migration `20260702080000`), integration-tested in the RLS suite, and
+  the editor form no longer offers placement flags.
+- **M — shared secret reuse**: dedicated `UNSUBSCRIBE_SECRET` and
+  `RATE_LIMIT_SALT` env vars (service-key fallback documented).
+- **M — unsubscribe tokens**: now timestamped with 30-day expiry, and the
+  state change moved behind a confirming POST.
+- **L — proposal apply integrity**: product-change approval re-verifies the
+  product still belongs to the proposal's brand.
+- **L — tooling safety**: the local DB shim aborts against a real Supabase
+  database; SVG removed from the public brand-media bucket allowlist.

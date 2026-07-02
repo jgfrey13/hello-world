@@ -93,7 +93,17 @@ const optionalTrimmed = (max: number) =>
 
 const optionalUrl = z.preprocess(
   (value) => (value === "" || value === null ? undefined : value),
-  z.string().trim().url().max(2048).optional(),
+  // http(s) only: z.url() alone accepts javascript:/data: schemes, which
+  // would become stored XSS when rendered as an href.
+  z
+    .string()
+    .trim()
+    .url()
+    .max(2048)
+    .refine((v) => v.startsWith("https://") || v.startsWith("http://"), {
+      message: "Must be an http(s) URL",
+    })
+    .optional(),
 );
 
 const emptyToUndefined = (value: unknown) =>
@@ -254,7 +264,13 @@ export const proposedBrandChangeSchema = z
   .object({
     summary: z.string().trim().min(1).max(500).optional(),
     full_description: z.string().trim().min(1).max(10000).optional(),
-    website_url: z.string().trim().url().max(2048).optional(),
+    website_url: z
+      .string()
+      .trim()
+      .url()
+      .max(2048)
+      .refine((v) => v.startsWith("https://") || v.startsWith("http://"))
+      .optional(),
     founder_names: z.string().trim().min(1).max(500).optional(),
     founded_year: z.coerce.number().int().min(1600).max(2100).optional(),
     headquarters_city: z.string().trim().min(1).max(120).optional(),
@@ -273,7 +289,13 @@ export const proposedProductChangeSchema = z
     materials: z.string().trim().min(1).max(1000).optional(),
     warranty_summary: z.string().trim().min(1).max(1000).optional(),
     shipping_summary: z.string().trim().min(1).max(1000).optional(),
-    direct_purchase_url: z.string().trim().url().max(2048).optional(),
+    direct_purchase_url: z
+      .string()
+      .trim()
+      .url()
+      .max(2048)
+      .refine((v) => v.startsWith("https://") || v.startsWith("http://"))
+      .optional(),
     price_amount: z.coerce.number().min(0).max(1000000).optional(),
   })
   .strict()
@@ -291,7 +313,13 @@ export const proposedNewProductSchema = z
     description: z.string().trim().min(1).max(10000).optional(),
     materials: z.string().trim().min(1).max(1000).optional(),
     price_amount: z.coerce.number().min(0).max(1000000).optional(),
-    direct_purchase_url: z.string().trim().url().max(2048).optional(),
+    direct_purchase_url: z
+      .string()
+      .trim()
+      .url()
+      .max(2048)
+      .refine((v) => v.startsWith("https://") || v.startsWith("http://"))
+      .optional(),
   })
   .strict();
 export type ProposedNewProduct = z.infer<typeof proposedNewProductSchema>;

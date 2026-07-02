@@ -24,7 +24,7 @@ export function MobileNav({ links }: { links: NavLink[] }) {
             <Menu aria-hidden="true" className="size-5" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right">
+        <SheetContent side="right" aria-describedby={undefined}>
           <SheetHeader>
             <SheetTitle>MadeHere</SheetTitle>
           </SheetHeader>

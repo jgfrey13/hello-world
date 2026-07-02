@@ -7,6 +7,19 @@
 -- (see tests/integration/rls.test.ts). It mirrors Supabase behavior:
 -- auth.uid() reads the request.jwt.claims 'sub' claim.
 
+-- Runtime guard: a real Supabase database carries the supabase_admin role
+-- (and an auth.users owned by it). Overwriting real auth infrastructure with
+-- this shim would be destructive, so abort hard if we detect one.
+do $$
+begin
+  if exists (select 1 from pg_roles where rolname = 'supabase_admin')
+     or exists (select 1 from pg_roles where rolname = 'supabase_auth_admin') then
+    raise exception
+      'supabase-local-shim.sql must never run against a real Supabase database';
+  end if;
+end
+$$;
+
 do $$
 begin
   if not exists (select 1 from pg_roles where rolname = 'anon') then

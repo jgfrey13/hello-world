@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import { ManufacturingStatusBadge } from "@/components/ui/manufacturing-status-badge";
 import type { EvidenceListItem } from "@/lib/database/shapes";
+import { safeHttpUrl } from "@/lib/security/urls";
 
 function formatDate(value: string | null): string | null {
   if (!value) return null;
@@ -44,14 +45,15 @@ export function EvidencePanel({ evidence }: { evidence: EvidenceListItem[] }) {
               </p>
             )}
             <p className="mt-2 text-sm">
-              {item.sourceUrl ? (
+              {safeHttpUrl(item.sourceUrl) ? (
                 <a
-                  href={item.sourceUrl}
+                  href={safeHttpUrl(item.sourceUrl)!}
                   rel="nofollow noopener"
                   target="_blank"
                   className="inline-flex items-center gap-1 underline underline-offset-4"
                 >
                   {item.sourceTitle ?? "Source"}
+                  <span className="sr-only"> (opens in new tab)</span>
                   <ExternalLink aria-hidden="true" className="size-3.5" />
                 </a>
               ) : (

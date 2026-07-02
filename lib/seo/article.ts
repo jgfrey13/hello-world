@@ -32,9 +32,17 @@ export function articleMetadata(
   };
 }
 
+/**
+ * JSON.stringify does not escape "</script>", so editor-controlled strings
+ * could break out of a JSON-LD block. Escaping "<" closes that hole.
+ */
+export function jsonLdSafe(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 export function articleJsonLd(detail: ArticleDetail): string {
   const { article, authorName } = detail;
-  return JSON.stringify({
+  return jsonLdSafe({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,

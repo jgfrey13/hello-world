@@ -26,7 +26,11 @@ export function MobileFilters({ children }: { children: React.ReactNode }) {
             Filters &amp; sorting
           </Button>
         </SheetTrigger>
-        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
+        <SheetContent
+          side="bottom"
+          aria-describedby={undefined}
+          className="max-h-[85vh] overflow-y-auto"
+        >
           <SheetHeader>
             <SheetTitle>Filters</SheetTitle>
           </SheetHeader>

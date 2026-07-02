@@ -19,7 +19,7 @@ export type RedirectDecision =
   | { kind: "no_destination" };
 
 const PRIVATE_HOST_PATTERN =
-  /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[?::1\]?$)|\.(local|internal)$/i;
+  /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|0\.|\[?::1\]?$)|\.(local|internal)$/i;
 
 /**
  * A destination is approved only if it is a well-formed absolute https URL

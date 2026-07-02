@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/auth";
 import { FormStatusBanner } from "@/components/forms/form-status-banner";
 import { BrandFormFields } from "@/components/admin/brand-form";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ export default async function NewBrandPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
+  const current = await getCurrentUser();
   const supabase = await createSupabaseServerClient();
   const { data: categories } = await supabase
     .from("categories")
@@ -29,7 +31,10 @@ export default async function NewBrandPage({
         <FormStatusBanner status={status} />
       </div>
       <form action={createBrandAction} className="mt-6 space-y-5">
-        <BrandFormFields categories={categories ?? []} />
+        <BrandFormFields
+          categories={categories ?? []}
+          showAdminFlags={current?.profile?.role === "admin"}
+        />
         <Button type="submit">Create draft</Button>
       </form>
     </div>

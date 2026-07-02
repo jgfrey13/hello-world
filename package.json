@@ -14,7 +14,8 @@
     "db:migrate": "bash scripts/db/migrate.sh",
     "db:types": "node scripts/db/gen-types.mjs",
     "db:seed": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f supabase/seed.sql",
-    "db:seed:remove": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f scripts/db/remove-demo-data.sql"
+    "db:seed:remove": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f scripts/db/remove-demo-data.sql",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -34,6 +35,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.61.1",
     "@supabase/postgres-meta": "^0.96.6",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

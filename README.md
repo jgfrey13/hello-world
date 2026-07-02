@@ -10,10 +10,14 @@ options, and shop through tracked affiliate links.
 
 ## Status
 
-**Phase 0 (planning & configuration) complete.** Project rules, subagents, and
-documentation are in place. Application code lands phase by phase — see
-`docs/known-limitations.md` for current status and
-`docs/architecture.md` §implementation for the sequence.
+**All 10 implementation phases complete (MVP feature-complete).** Public
+directory on Postgres full-text search, evidence workflows, admin + brand-owner
+apps, tracked affiliate redirects, Stripe test-mode subscriptions, newsletter
+capture, CSV import, and scheduled jobs — with RLS integration-tested on every
+table, 90 unit/integration tests, and a Playwright + axe e2e suite. See
+`docs/known-limitations.md` for the current-state details and
+`docs/launch-checklist.md` for what remains before production go-live
+(credentials, legal review, staging e2e, payments gate).
 
 ## Tech stack
 
