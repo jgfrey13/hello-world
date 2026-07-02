@@ -24,6 +24,7 @@ const serverEnvSchema = publicEnvSchema.extend({
   STRIPE_PRICE_FEATURED: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(1).optional(),
+  ADMIN_ALERT_EMAIL: z.string().email().optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;

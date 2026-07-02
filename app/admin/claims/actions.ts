@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import { recordAudit } from "@/lib/database/audit";
+import { notifyClaimDecision } from "@/lib/email/notifications";
+import { after } from "next/server";
 import { z } from "zod";
 
 const decisionSchema = z.object({
@@ -30,7 +32,7 @@ export async function reviewClaimAction(formData: FormData) {
   const supabase = await createSupabaseServerClient();
   const { data: claim } = await supabase
     .from("brand_claims")
-    .select("id, brand_id, user_id, status")
+    .select("id, brand_id, user_id, status, company_email, brands!inner(name)")
     .eq("id", id)
     .maybeSingle();
   if (!claim || claim.status !== "pending") {
@@ -73,6 +75,10 @@ export async function reviewClaimAction(formData: FormData) {
     entityId: id,
     after: { brand_id: claim!.brand_id, claimant: claim!.user_id },
   });
+
+  const applicantEmail = claim!.company_email;
+  const brandName = claim!.brands.name;
+  after(() => notifyClaimDecision({ to: applicantEmail, brandName, decision }));
 
   revalidatePath("/admin/claims");
   redirect("/admin/claims?status=saved");

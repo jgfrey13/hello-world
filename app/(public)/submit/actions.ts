@@ -1,9 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { brandSubmissionSchema } from "@/lib/validation";
 import { checkRateLimit, isSpamSubmission } from "@/lib/security/rate-limit";
+import { notifyAdmin } from "@/lib/email/notifications";
+import { recordEvent } from "@/lib/analytics/events";
 
 export async function submitBrandAction(formData: FormData) {
   // Spam trap: pretend success so bots learn nothing.
@@ -46,6 +49,14 @@ export async function submitBrandAction(formData: FormData) {
     comments: parsed.data!.comments ?? null,
   });
   if (error) redirect("/submit?status=error");
+
+  after(async () => {
+    await notifyAdmin(
+      "brand submission",
+      `Brand: ${parsed.data!.brandName}\nWebsite: ${parsed.data!.websiteUrl}`,
+    );
+    await recordEvent({ type: "brand_submission", path: "/submit" });
+  });
 
   redirect("/submit?status=received");
 }

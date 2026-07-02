@@ -1,48 +1,53 @@
 "use client";
 
 import * as React from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { HoneypotField } from "@/components/forms/honeypot-field";
 import { cn } from "@/lib/utils";
+import {
+  subscribeNewsletterAction,
+  type NewsletterActionState,
+} from "@/app/newsletter/actions";
 
-type FormState =
-  | { status: "idle" }
-  | { status: "error"; message: string }
-  | { status: "unavailable" };
+const STATUS_TEXT: Record<
+  Exclude<NewsletterActionState["status"], "idle">,
+  string
+> = {
+  success: "You're subscribed — thanks! Unsubscribe anytime from any email.",
+  invalid: "Enter a valid email address.",
+  rate_limited: "Too many attempts — please wait a minute and try again.",
+  error: "Something went wrong. Please try again.",
+};
 
 /**
- * Newsletter signup UI. Client-side validation only in Phase 1; the storage
- * backend (consent record, duplicate handling) lands in Phase 8 — until then
- * submission reports honestly that signup is not yet active. Do not wire this
- * to a fake success state.
+ * Live newsletter signup: consent timestamp + source stored server-side,
+ * duplicates idempotent, unsubscribed addresses re-consented. Campaigns
+ * remain gated behind sender-domain auth (see docs/deployment.md).
  */
 export function NewsletterForm({
   variant = "default",
 }: {
   variant?: "default" | "footer";
 }) {
-  const [state, setState] = React.useState<FormState>({ status: "idle" });
+  const [state, formAction, pending] = useActionState<
+    NewsletterActionState,
+    FormData
+  >(subscribeNewsletterAction, { status: "idle" });
   const id = React.useId();
   const isFooter = variant === "footer";
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const email = new FormData(form).get("email");
-    if (
-      typeof email !== "string" ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
-      setState({ status: "error", message: "Enter a valid email address." });
-      return;
-    }
-    // Phase 8 wires this to the server action that stores consent.
-    setState({ status: "unavailable" });
-  }
+  const isError = state.status !== "idle" && state.status !== "success";
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form action={formAction} noValidate>
+      <HoneypotField />
+      <input
+        type="hidden"
+        name="consentSource"
+        value={isFooter ? "site-footer" : "site"}
+      />
       <Label
         htmlFor={`${id}-email`}
         className={cn(isFooter && "text-primary-foreground")}
@@ -58,11 +63,15 @@ export function NewsletterForm({
           required
           placeholder="you@example.com"
           aria-describedby={`${id}-status`}
-          aria-invalid={state.status === "error" || undefined}
+          aria-invalid={isError || undefined}
           className={cn(isFooter && "bg-primary-foreground text-foreground")}
         />
-        <Button type="submit" variant={isFooter ? "secondary" : "default"}>
-          Sign up
+        <Button
+          type="submit"
+          variant={isFooter ? "secondary" : "default"}
+          disabled={pending}
+        >
+          {pending ? "Signing up…" : "Sign up"}
         </Button>
       </div>
       <p
@@ -70,7 +79,7 @@ export function NewsletterForm({
         role="status"
         className={cn(
           "mt-1.5 min-h-5 text-xs",
-          state.status === "error"
+          isError
             ? isFooter
               ? "text-primary-foreground font-medium"
               : "text-destructive"
@@ -79,11 +88,9 @@ export function NewsletterForm({
               : "text-muted-foreground",
         )}
       >
-        {state.status === "error" && state.message}
-        {state.status === "unavailable" &&
-          "Newsletter signup isn't active yet — it launches with our notifications phase."}
-        {state.status === "idle" &&
-          "No spam. Unsubscribe anytime. We only send it when it's worth reading."}
+        {state.status === "idle"
+          ? "No spam. Unsubscribe anytime. We only send it when it's worth reading."
+          : STATUS_TEXT[state.status]}
       </p>
     </form>
   );

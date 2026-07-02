@@ -1,8 +1,27 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 7 complete)
+## Current status (Phase 8 complete)
 
-Phases 0–7 are done. Phase 7 adds the commercial layer:
+Phases 0–8 are done. Phase 8 adds newsletter capture + notifications:
+
+- **Newsletter signup is live** (footer form, useActionState inline
+  states): honeypot + DB rate limit, consent timestamp + source recorded,
+  duplicate signups idempotent, previously-unsubscribed addresses
+  re-consented. Signups recorded in first-party analytics. The table stays
+  service-role-only — never publicly readable.
+- **Unsubscribe architecture**: stateless HMAC tokens (timing-safe verify,
+  unit-tested incl. tamper/rotation cases) power one-click
+  /newsletter/unsubscribe links; invalid tokens reveal nothing.
+- **Transactional email (Resend)**: plain-text sends with an honest
+  disabled state when unconfigured (never throws, never fakes). Admin
+  alerts on new brand submissions/corrections/claims (ADMIN_ALERT_EMAIL is
+  the notification preference), and claim applicants are emailed the
+  decision. All sends are fire-and-forget via after().
+- **Campaign gate unchanged**: no bulk/marketing sends exist anywhere;
+  campaigns require sender-domain auth + reviewed consent flow + tested
+  unsubscribe (docs/deployment.md go-live gate).
+
+Phase 7 summary (commercial layer):
 
 - **/go/[slug] tracked redirect**: published-product lookup, destination
   re-validation on every hit (https only, no credentials, no private/IP

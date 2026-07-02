@@ -1,9 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { correctionSchema } from "@/lib/validation";
 import { checkRateLimit, isSpamSubmission } from "@/lib/security/rate-limit";
+import { notifyAdmin } from "@/lib/email/notifications";
 
 export async function submitCorrectionAction(formData: FormData) {
   if (isSpamSubmission(formData)) redirect("/correction?status=received");
@@ -29,6 +31,8 @@ export async function submitCorrectionAction(formData: FormData) {
     submitter_email: parsed.data!.submitterEmail,
   });
   if (error) redirect("/correction?status=error");
+
+  after(() => notifyAdmin("correction", `Page: ${parsed.data!.pageUrl}`));
 
   redirect("/correction?status=received");
 }

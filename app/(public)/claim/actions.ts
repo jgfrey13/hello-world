@@ -1,10 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { brandClaimSchema } from "@/lib/validation";
 import { requireUser } from "@/lib/auth";
 import { checkRateLimit, isSpamSubmission } from "@/lib/security/rate-limit";
+import { notifyAdmin } from "@/lib/email/notifications";
+import { recordEvent } from "@/lib/analytics/events";
 
 export async function submitClaimAction(formData: FormData) {
   // Authentication is required before anything else.
@@ -72,6 +75,18 @@ export async function submitClaimAction(formData: FormData) {
     if (error.code === "23505") redirect("/claim?status=duplicate");
     redirect("/claim?status=error");
   }
+
+  after(async () => {
+    await notifyAdmin(
+      "profile claim",
+      `Applicant: ${parsed.data!.applicantName} (${parsed.data!.companyEmail})`,
+    );
+    await recordEvent({
+      type: "brand_claim",
+      brandId: parsed.data!.brandId,
+      path: "/claim",
+    });
+  });
 
   redirect("/claim?status=received");
 }
