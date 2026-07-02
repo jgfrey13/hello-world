@@ -1,27 +1,48 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 1 complete)
+## Current status (Phase 2 complete)
 
-The application foundation exists: Next.js 16 (App Router) + TypeScript strict +
-Tailwind v4, design tokens, global layout with accessible mobile navigation,
-the shared component set, and all public-page shells rendering clearly-labeled
-fictional demo content from `lib/demo/content.ts`. `format`, `lint`,
-`typecheck`, and `build` all pass; `test`/`db:*` commands land with their phases.
+Phases 0–2 are done: docs/config, the application foundation (Next.js 16 +
+TypeScript strict + Tailwind v4, tokens, layout, components, public shells with
+labeled fictional demo content), and now the database & authentication layer:
 
-Phase-1-specific limitations (all honest-by-design, replaced in later phases):
+- 21-table schema in `supabase/migrations/` (UUID PKs, timestamps, FKs,
+  indexes, enums, check constraints) with **RLS enabled and tested on every
+  table**, integrity triggers (role changes admin-only, classification
+  admin-only, evidence approval admin-only + source required), an append-only
+  audit log, and storage buckets/policies.
+- Generated `lib/database/types.ts` (via `npm run db:types`).
+- Supabase clients (`lib/supabase`), Zod env validation (`lib/security/env`),
+  shared entity schemas (`lib/validation`), role helpers (`lib/auth`),
+  middleware session refresh + `/admin`·`/brand-dashboard` gating, and
+  login/signup/callback/sign-out auth flows.
+- Fictional seed (12 brands / 30 products / 8 categories / 7 articles, all
+  `is_demo`) with a verified remove script.
+- Vitest: 33 tests green, including 17 RLS integration tests covering the
+  required authorization matrix (drafts hidden, no self-role-elevation,
+  owners can't touch products/evidence/classifications, claims pending-only
+  - duplicate-blocked, no self-granted paid status, newsletter/audit private).
 
-- Public forms (submit/claim/correction) are disabled previews with a visible
-  notice — no fake submission path. Backends land in Phases 2/5.
-- The newsletter form validates client-side but reports signup as not yet
-  active (Phase 8 wires storage + consent).
-- Directory search filters demo data server-side via `?q=`; real Postgres
-  full-text search, the full filter panel, and pagination land in Phase 3.
-- Brand/product/guide detail pages don't exist yet (cards link to routes that
-  404 until Phase 3/4); policy detail pages work.
+Current limitations (replaced in later phases):
+
+- Public pages still render `lib/demo/content.ts`, not the database — the
+  swap to `lib/database` queries is Phase 3. Form shells stay disabled until
+  their server actions land (Phases 5/8).
+- Auth flows are implemented against Supabase Auth but need a real Supabase
+  project (or `supabase start`) to exercise end-to-end; they are not covered
+  by automated tests yet (Playwright e2e lands Phase 10).
+- `db:migrate` uses a psql-based runner with its own `__migrations` tracking
+  table — teams using `supabase db push` should pick one mechanism and stick
+  to it. Local validation uses `scripts/db/supabase-local-shim.sql` to emulate
+  Supabase's auth/storage/roles on plain Postgres; never run the shim against
+  a real Supabase project.
+- The Supabase CLI's docker-based typegen can't run here (registry blocked);
+  `npm run db:types` uses `@supabase/postgres-meta` directly — the same
+  generator, identical output.
 - The shadcn CLI registry (`ui.shadcn.com`) is blocked by this environment's
   network policy, so the `components/ui` primitives are vendored by hand on
   Radix (`radix-ui` package) — same architecture, maintained in-repo.
-- `npm audit` reports 2 moderate advisories in Next's *bundled* postcss
+- `npm audit` reports 2 moderate advisories in Next's _bundled_ postcss
   (GHSA-qx2v-qp2m-jg93); the only offered "fix" downgrades Next to 9.x. Not
   applicable to our usage (no untrusted CSS stringification); revisit on the
   next Next.js patch release.
