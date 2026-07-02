@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SponsoredBadge } from "@/components/ui/sponsored-badge";
-import type { ArticleListItem } from "@/lib/database/shapes";
+import { articleHref, type ArticleListItem } from "@/lib/database/shapes";
 
 export function GuideCard({ guide }: { guide: ArticleListItem }) {
   return (
@@ -19,7 +19,7 @@ export function GuideCard({ guide }: { guide: ArticleListItem }) {
         )}
         <CardTitle>
           <Link
-            href={`/guides/${guide.slug}`}
+            href={articleHref(guide)}
             className="hover:underline focus-visible:underline"
           >
             {guide.title}

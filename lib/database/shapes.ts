@@ -72,6 +72,25 @@ export interface Paginated<T> {
   hasDemo: boolean;
 }
 
+/** Shopping guides live under /guides; other editorial under /articles. */
+export function articleHref(
+  article: Pick<ArticleListItem, "slug" | "articleType">,
+): string {
+  return article.articleType === "shopping_guide"
+    ? `/guides/${article.slug}`
+    : `/articles/${article.slug}`;
+}
+
+export const ARTICLE_TYPE_LABELS: Record<string, string> = {
+  shopping_guide: "Shopping guide",
+  brand_story: "Brand story",
+  founder_story: "Founder story",
+  factory_story: "Factory story",
+  comparison: "Comparison",
+  buying_guide: "Buying guide",
+  news: "News",
+};
+
 export function formatPrice(
   amount: number | null,
   approximate: boolean,

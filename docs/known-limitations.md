@@ -1,36 +1,35 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 3 complete)
+## Current status (Phase 4 complete)
 
-Phases 0–3 are done: docs/config, the application foundation, the database &
-authentication layer (21 tables, RLS enabled and integration-tested on every
-table, integrity triggers, audit log, storage policies, generated types, auth
-flows, 12/30/8/7 fictional seed), and now the public directory on real data:
+Phases 0–4 are done: docs/config, the application foundation, the database &
+authentication layer (21 tables with tested RLS, integrity triggers, audit
+log, storage policies, generated types, auth flows, fictional seed), the
+public directory on real data (full-text search, filters, pagination,
+brand/product/category detail pages, honest per-product classification
+display), and now editorial content:
 
-- `lib/database/` typed query modules (brands, products, categories,
-  articles) returning display shapes — components never see raw rows.
-- Postgres full-text search via generated `search_tsv` columns (websearch
-  syntax), filters (category, manufacturing status, state, price, sort),
-  and server-side pagination — all state in shareable URL params parsed by
-  a single zod module (`lib/search/params.ts`, unit-tested against hostile
-  input).
-- Directory pages (brands/products) with accessible filter panel + mobile
-  drawer (plain GET forms — work without JS); result counts, empty states.
-- Detail pages: brand profile (per-product classification breakdown — no
-  brand-level "Made in USA" badge, honest by design; approved-evidence
-  panel from the RLS-protected view; locations; products; related guides;
-  claim/correction links), product page (price + verification date,
-  manufacturing details, imported-components disclosure, evidence, purchase
-  sidebar with affiliate disclosure, related products + American-made
-  alternatives), category pages, DB-backed guides index and homepage.
-- Demo notice renders automatically whenever any returned row is seed data.
-- Vitest: 41 tests green (unit + RLS integration).
+- Article detail pages: shopping guides at `/guides/[slug]`, stories and
+  other editorial at `/articles/[slug]`, with a permanent redirect keeping
+  one canonical URL per article.
+- Shared article renderer: type label, author/published/updated line,
+  linked products with editorial "best for" labels, brands mentioned,
+  related reading. Body is stored as plain text and rendered as paragraphs
+  — no raw-HTML injection surface.
+- Disclosures as components: conspicuous sponsor disclosure (with sponsor
+  name/link) on every sponsored article, affiliate disclosure whenever
+  required — and sponsorship is disclosed in structured data too.
+- SEO: editable seo_title/seo_description columns drive metadata, canonical
+  URLs, Open Graph article tags, and Article JSON-LD; unpublished records
+  are always noindex.
+- Vitest: 47 tests green (unit + RLS integration).
 
 Current limitations (replaced in later phases):
 
-- Guide/article **detail** pages land in Phase 4 (guide cards link to
-  routes that 404 until then). Form shells stay disabled until their server
-  actions land (Phases 5/8).
+- Form shells stay disabled until their server actions land (Phases 5/8).
+- Articles have no dedicated sources field yet; sources are cited through
+  linked evidence and in-body references. Revisit with the editorial
+  workflow (Phase 5).
 - Purchase buttons link to stored destinations directly (with disclosure);
   the tracked `/go/[slug]` redirect replaces them in Phase 7.
 - "Relevance" sort currently means featured-first + name; true `ts_rank`
