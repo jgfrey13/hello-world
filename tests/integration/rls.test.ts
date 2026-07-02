@@ -407,3 +407,37 @@ describeDb("rate_limit_events privacy", () => {
     });
   });
 });
+
+// Appended in Phase 7: Stripe webhook idempotency ledger behavior + privacy.
+describeDb("stripe webhook idempotency ledger", () => {
+  let sql: Sql;
+  beforeAll(() => {
+    sql = postgres(databaseUrl!, { max: 1, onnotice: () => {} });
+  });
+  afterAll(async () => {
+    await sql?.end();
+  });
+
+  it("a duplicate event id cannot be claimed twice", async () => {
+    await withRollback(sql, async (tx) => {
+      await tx`insert into public.stripe_webhook_events (id, event_type)
+        values ('evt_rlstest', 'checkout.session.completed')`;
+      await expectDenied(
+        tx,
+        /duplicate key/,
+        (sp) => sp`insert into public.stripe_webhook_events (id, event_type)
+          values ('evt_rlstest', 'checkout.session.completed')`,
+      );
+    });
+  });
+
+  it("is invisible to anon and authenticated users", async () => {
+    await withRollback(sql, async (tx) => {
+      await tx`insert into public.stripe_webhook_events (id, event_type)
+        values ('evt_rlstest2', 'x')`;
+      await impersonate(tx, "anon");
+      const rows = await tx`select * from public.stripe_webhook_events`;
+      expect(rows.length).toBe(0);
+    });
+  });
+});

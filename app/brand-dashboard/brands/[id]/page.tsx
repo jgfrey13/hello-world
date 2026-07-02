@@ -20,6 +20,11 @@ import {
   proposeNewProductAction,
   uploadBrandMediaAction,
 } from "@/app/brand-dashboard/brands/[id]/actions";
+import {
+  openBillingPortalAction,
+  startCheckoutAction,
+} from "@/app/brand-dashboard/brands/[id]/billing-actions";
+import { stripeConfigured } from "@/lib/stripe";
 
 export const metadata = { title: "Manage Brand" };
 
@@ -35,6 +40,7 @@ export default async function OwnedBrandPage({
   if (!detail) notFound();
   const { brand, products, pendingChanges, subscription } = detail;
   const analytics = await getBrandAnalytics(brand.id);
+  const billingEnabled = stripeConfigured();
 
   return (
     <div>
@@ -107,13 +113,47 @@ export default async function OwnedBrandPage({
               </span>
             )}
           </p>
-          <p className="text-muted-foreground mt-1">
-            Upgrades open when billing launches — see{" "}
-            <Link href="/pricing" className="underline underline-offset-4">
-              plans &amp; pricing
-            </Link>
-            . A paid plan never changes manufacturing classifications or
-            evidence review.
+          {billingEnabled ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {brand.subscription_tier !== "verified" && (
+                <form action={startCheckoutAction}>
+                  <input type="hidden" name="brandId" value={brand.id} />
+                  <input type="hidden" name="plan" value="verified" />
+                  <Button type="submit" size="sm">
+                    Upgrade to Verified
+                  </Button>
+                </form>
+              )}
+              {brand.subscription_tier !== "featured" && (
+                <form action={startCheckoutAction}>
+                  <input type="hidden" name="brandId" value={brand.id} />
+                  <input type="hidden" name="plan" value="featured" />
+                  <Button type="submit" size="sm" variant="outline">
+                    Upgrade to Featured
+                  </Button>
+                </form>
+              )}
+              {subscription && (
+                <form action={openBillingPortalAction}>
+                  <input type="hidden" name="brandId" value={brand.id} />
+                  <Button type="submit" size="sm" variant="ghost">
+                    Manage billing
+                  </Button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <p className="text-muted-foreground mt-1">
+              Billing isn’t configured in this environment yet — see{" "}
+              <Link href="/pricing" className="underline underline-offset-4">
+                plans &amp; pricing
+              </Link>{" "}
+              for what each tier includes.
+            </p>
+          )}
+          <p className="text-muted-foreground mt-2">
+            A paid plan never changes manufacturing classifications, evidence
+            review, or editorial decisions.
           </p>
         </div>
       </section>

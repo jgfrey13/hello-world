@@ -70,9 +70,12 @@ export default async function ProductPage({
   const price = formatPrice(product.price_amount, product.price_is_approximate);
   const priceVerified = formatDate(product.price_verified_at);
   const lastReviewed = formatDate(product.last_reviewed_at);
-  // Purchase links point at stored destinations directly until the tracked
-  // /go/[slug] redirect lands (Phase 7).
-  const purchaseUrl = product.affiliate_url ?? product.direct_purchase_url;
+  // Purchase clicks route through the tracked, destination-validated
+  // /go/[slug] redirect (see app/go/[slug]/route.ts).
+  const hasDestination = Boolean(
+    product.affiliate_url ?? product.direct_purchase_url,
+  );
+  const purchaseUrl = hasDestination ? `/go/${product.slug}` : null;
   const manufacturingLocation = [
     product.manufacturing_city,
     product.manufacturing_state,

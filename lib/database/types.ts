@@ -1160,6 +1160,24 @@ export type Database = {
           },
         ];
       };
+      stripe_webhook_events: {
+        Row: {
+          event_type: string;
+          id: string;
+          received_at: string;
+        };
+        Insert: {
+          event_type: string;
+          id: string;
+          received_at?: string;
+        };
+        Update: {
+          event_type?: string;
+          id?: string;
+          received_at?: string;
+        };
+        Relationships: [];
+      };
       subscriptions: {
         Row: {
           brand_id: string;

@@ -1,8 +1,30 @@
 # Known Limitations & Data Lifecycle — MadeHere
 
-## Current status (Phase 6 complete)
+## Current status (Phase 7 complete)
 
-Phases 0–6 are done. Phase 6 adds the brand-owner dashboard:
+Phases 0–7 are done. Phase 7 adds the commercial layer:
+
+- **/go/[slug] tracked redirect**: published-product lookup, destination
+  re-validation on every hit (https only, no credentials, no private/IP
+  hosts — a bad row can never become an open redirect), privacy-conscious
+  click recording (no IP/UA/user id), affiliate URL with direct-URL
+  fallback, 404 for unknown slugs, 410 for delisted products, product-page
+  fallback when no destination exists; no-store + noindex on redirects.
+  Purchase buttons now route through it. Decision logic is a pure function
+  with every branch unit-tested.
+- **Stripe (test-mode first)**: server-side checkout sessions and Customer
+  Portal from the brand dashboard (ownership-checked; honest disabled state
+  when billing env is absent); signature-verified webhook with a DB
+  idempotency ledger (claim-before-apply, released on failure so Stripe
+  retries work); subscription sync writes plan/status/periods and the
+  brand's TIER only — cancellation preserves the free Basic listing and
+  can never touch published status, classification, or verification
+  (unit-tested invariant). Entitlement is written exclusively by the
+  webhook; no client-reported paid status.
+- Runtime-smoked: /go 404s bad slugs without DB, 503s when DB is down;
+  webhook rejects missing/invalid signatures with 400.
+
+Phase 6 summary (brand-owner dashboard):
 
 - **/brand-dashboard** (sign-in required; visibility driven entirely by
   brand_owners grants via RLS): owned-brand overview; per-brand page with

@@ -16,9 +16,12 @@ const publicEnvSchema = z.object({
 
 const serverEnvSchema = publicEnvSchema.extend({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  // Stripe/Resend become required when their phases land (Phases 7/8).
+  // Billing/email are optional config: absent vars disable the feature
+  // honestly rather than failing the whole app.
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  STRIPE_PRICE_VERIFIED: z.string().min(1).optional(),
+  STRIPE_PRICE_FEATURED: z.string().min(1).optional(),
   RESEND_API_KEY: z.string().min(1).optional(),
   EMAIL_FROM: z.string().min(1).optional(),
 });
