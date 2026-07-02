@@ -6,9 +6,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SponsoredBadge } from "@/components/ui/sponsored-badge";
-import type { DemoGuide } from "@/lib/demo/content";
+import type { ArticleListItem } from "@/lib/database/shapes";
 
-export function GuideCard({ guide }: { guide: DemoGuide }) {
+export function GuideCard({ guide }: { guide: ArticleListItem }) {
   return (
     <Card className="h-full transition-shadow hover:shadow-sm">
       <CardHeader>
@@ -25,7 +25,7 @@ export function GuideCard({ guide }: { guide: DemoGuide }) {
             {guide.title}
           </Link>
         </CardTitle>
-        <CardDescription>{guide.excerpt}</CardDescription>
+        {guide.excerpt && <CardDescription>{guide.excerpt}</CardDescription>}
       </CardHeader>
     </Card>
   );

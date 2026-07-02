@@ -6,9 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { DemoCategory } from "@/lib/demo/content";
+import type { CategoryListItem } from "@/lib/database/shapes";
 
-export function CategoryCard({ category }: { category: DemoCategory }) {
+export function CategoryCard({ category }: { category: CategoryListItem }) {
   return (
     <Card className="h-full transition-shadow hover:shadow-sm">
       <CardHeader>
@@ -24,7 +24,9 @@ export function CategoryCard({ category }: { category: DemoCategory }) {
             className="text-muted-foreground size-4"
           />
         </CardTitle>
-        <CardDescription>{category.description}</CardDescription>
+        {category.description && (
+          <CardDescription>{category.description}</CardDescription>
+        )}
       </CardHeader>
     </Card>
   );

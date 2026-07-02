@@ -6,14 +6,25 @@ import { CategoryCard } from "@/components/categories/category-card";
 import { GuideCard } from "@/components/articles/guide-card";
 import { DemoNotice } from "@/components/ui/demo-notice";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  demoBrands,
-  demoCategories,
-  demoGuides,
-  demoProducts,
-} from "@/lib/demo/content";
+import { getFeaturedBrands } from "@/lib/database/brands";
+import { getRecentProducts } from "@/lib/database/products";
+import { getActiveCategories } from "@/lib/database/categories";
+import { getPublishedArticles } from "@/lib/database/articles";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [brands, products, categories, guides] = await Promise.all([
+    getFeaturedBrands(3),
+    getRecentProducts(3),
+    getActiveCategories(),
+    getPublishedArticles({ limit: 3 }),
+  ]);
+  const hasDemo =
+    brands.some((b) => b.isDemo) ||
+    products.some((p) => p.isDemo) ||
+    guides.some((g) => g.isDemo);
+
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6">
       {/* Hero */}
@@ -34,87 +45,95 @@ export default function HomePage() {
         </p>
       </section>
 
-      <DemoNotice />
+      {hasDemo && <DemoNotice />}
 
       {/* Categories */}
-      <section aria-labelledby="home-categories" className="py-12">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 id="home-categories" className="font-serif text-2xl font-bold">
-            Browse by category
-          </h2>
-          <Link
-            href="/categories"
-            className="text-sm font-medium underline-offset-4 hover:underline"
-          >
-            All categories
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {demoCategories.slice(0, 4).map((category) => (
-            <CategoryCard key={category.slug} category={category} />
-          ))}
-        </div>
-      </section>
+      {categories.length > 0 && (
+        <section aria-labelledby="home-categories" className="py-12">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 id="home-categories" className="font-serif text-2xl font-bold">
+              Browse by category
+            </h2>
+            <Link
+              href="/categories"
+              className="text-sm font-medium underline-offset-4 hover:underline"
+            >
+              All categories
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.slice(0, 4).map((category) => (
+              <CategoryCard key={category.id} category={category} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Recently reviewed products */}
-      <section aria-labelledby="home-products" className="py-12">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 id="home-products" className="font-serif text-2xl font-bold">
-            Recently reviewed products
-          </h2>
-          <Link
-            href="/products"
-            className="text-sm font-medium underline-offset-4 hover:underline"
-          >
-            All products
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {demoProducts.slice(0, 3).map((product) => (
-            <ProductCard key={product.slug} product={product} />
-          ))}
-        </div>
-      </section>
+      {products.length > 0 && (
+        <section aria-labelledby="home-products" className="py-12">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 id="home-products" className="font-serif text-2xl font-bold">
+              Recently published products
+            </h2>
+            <Link
+              href="/products"
+              className="text-sm font-medium underline-offset-4 hover:underline"
+            >
+              All products
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured brands */}
-      <section aria-labelledby="home-brands" className="py-12">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 id="home-brands" className="font-serif text-2xl font-bold">
-            Featured brands
-          </h2>
-          <Link
-            href="/brands"
-            className="text-sm font-medium underline-offset-4 hover:underline"
-          >
-            All brands
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {demoBrands.slice(0, 3).map((brand) => (
-            <BrandCard key={brand.slug} brand={brand} />
-          ))}
-        </div>
-      </section>
+      {brands.length > 0 && (
+        <section aria-labelledby="home-brands" className="py-12">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 id="home-brands" className="font-serif text-2xl font-bold">
+              Featured brands
+            </h2>
+            <Link
+              href="/brands"
+              className="text-sm font-medium underline-offset-4 hover:underline"
+            >
+              All brands
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {brands.map((brand) => (
+              <BrandCard key={brand.id} brand={brand} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Guides */}
-      <section aria-labelledby="home-guides" className="py-12">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <h2 id="home-guides" className="font-serif text-2xl font-bold">
-            Shopping guides
-          </h2>
-          <Link
-            href="/guides"
-            className="text-sm font-medium underline-offset-4 hover:underline"
-          >
-            All guides
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {demoGuides.map((guide) => (
-            <GuideCard key={guide.slug} guide={guide} />
-          ))}
-        </div>
-      </section>
+      {guides.length > 0 && (
+        <section aria-labelledby="home-guides" className="py-12">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <h2 id="home-guides" className="font-serif text-2xl font-bold">
+              Guides &amp; stories
+            </h2>
+            <Link
+              href="/guides"
+              className="text-sm font-medium underline-offset-4 hover:underline"
+            >
+              All guides
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {guides.map((guide) => (
+              <GuideCard key={guide.id} guide={guide} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Methodology intro */}
       <section

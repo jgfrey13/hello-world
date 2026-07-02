@@ -8,18 +8,25 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ManufacturingStatusBadge } from "@/components/ui/manufacturing-status-badge";
+import { VerificationBadge } from "@/components/ui/verification-badge";
 import { SponsoredBadge } from "@/components/ui/sponsored-badge";
-import type { DemoBrand } from "@/lib/demo/content";
+import type { BrandListItem } from "@/lib/database/shapes";
 
-export function BrandCard({ brand }: { brand: DemoBrand }) {
+/**
+ * Brand cards show evidence-review status, not a manufacturing badge —
+ * manufacturing is classified per product (see verification methodology),
+ * and a single brand-level badge would overstate mixed catalogs.
+ */
+export function BrandCard({ brand }: { brand: BrandListItem }) {
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-sm">
       <CardHeader>
-        <div className="flex flex-wrap items-center gap-2">
-          <ManufacturingStatusBadge classification={brand.classification} />
-          {brand.isSponsored && <SponsoredBadge />}
-        </div>
+        {(brand.isVerified || brand.isSponsored) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {brand.isVerified && <VerificationBadge />}
+            {brand.isSponsored && <SponsoredBadge />}
+          </div>
+        )}
         <CardTitle>
           <Link
             href={`/brands/${brand.slug}`}
@@ -28,29 +35,39 @@ export function BrandCard({ brand }: { brand: DemoBrand }) {
             {brand.name}
           </Link>
         </CardTitle>
-        <CardDescription>{brand.summary}</CardDescription>
+        {brand.summary && <CardDescription>{brand.summary}</CardDescription>}
       </CardHeader>
       <CardContent className="mt-auto">
         <div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          <span className="inline-flex items-center gap-1">
-            <MapPin aria-hidden="true" className="size-3.5" />
-            {brand.state}
-          </span>
-          <span aria-hidden="true">
-            {"$".repeat(brand.priceLevel)}
-            <span className="opacity-30">
-              {"$".repeat(3 - brand.priceLevel)}
+          {brand.state && (
+            <span className="inline-flex items-center gap-1">
+              <MapPin aria-hidden="true" className="size-3.5" />
+              {brand.state}
             </span>
-          </span>
-          <span className="sr-only">Price level {brand.priceLevel} of 3</span>
+          )}
+          {brand.priceLevel && (
+            <>
+              <span aria-hidden="true">
+                {"$".repeat(brand.priceLevel)}
+                <span className="opacity-30">
+                  {"$".repeat(3 - brand.priceLevel)}
+                </span>
+              </span>
+              <span className="sr-only">
+                Price level {brand.priceLevel} of 3
+              </span>
+            </>
+          )}
         </div>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {brand.categories.map((category) => (
-            <Badge key={category} variant="muted">
-              {category}
-            </Badge>
-          ))}
-        </div>
+        {brand.categories.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {brand.categories.map((category) => (
+              <Badge key={category} variant="muted">
+                {category}
+              </Badge>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

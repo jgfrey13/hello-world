@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/card";
 import { ManufacturingStatusBadge } from "@/components/ui/manufacturing-status-badge";
 import { SponsoredBadge } from "@/components/ui/sponsored-badge";
-import type { DemoProduct } from "@/lib/demo/content";
+import { formatPrice, type ProductListItem } from "@/lib/database/shapes";
 
-export function ProductCard({ product }: { product: DemoProduct }) {
+export function ProductCard({ product }: { product: ProductListItem }) {
+  const price = formatPrice(product.priceAmount, product.priceIsApproximate);
   return (
     <Card className="flex h-full flex-col transition-shadow hover:shadow-sm">
       <CardHeader>
@@ -37,10 +38,14 @@ export function ProductCard({ product }: { product: DemoProduct }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="mt-auto">
-        <p className="text-muted-foreground text-sm">{product.summary}</p>
+        {product.summary && (
+          <p className="text-muted-foreground text-sm">{product.summary}</p>
+        )}
         <div className="mt-3 flex items-center justify-between text-sm">
-          <span className="font-medium">{product.priceDisplay}</span>
-          <span className="text-muted-foreground">{product.category}</span>
+          {price && <span className="font-medium">{price}</span>}
+          {product.category && (
+            <span className="text-muted-foreground">{product.category}</span>
+          )}
         </div>
       </CardContent>
     </Card>

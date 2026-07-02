@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { demoCategories } from "@/lib/demo/content";
+import { getActiveCategories } from "@/lib/database/categories";
 
 export const metadata: Metadata = {
   title: "Submit a Brand",
@@ -14,7 +14,10 @@ export const metadata: Metadata = {
     "Suggest an American-made brand for the MadeHere directory. Every submission is reviewed against our evidence standard.",
 };
 
-export default function SubmitBrandPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SubmitBrandPage() {
+  const categories = await getActiveCategories();
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <PageHeader
@@ -69,7 +72,7 @@ export default function SubmitBrandPage() {
                 <Label htmlFor="categories">Primary category</Label>
                 <Select id="categories" name="category" required>
                   <option value="">Select…</option>
-                  {demoCategories.map((category) => (
+                  {categories.map((category) => (
                     <option key={category.slug} value={category.slug}>
                       {category.name}
                     </option>

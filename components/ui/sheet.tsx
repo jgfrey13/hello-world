@@ -46,16 +46,23 @@ const sheetVariants = cva(
 interface SheetContentProps
   extends
     React.ComponentProps<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {}
+    VariantProps<typeof sheetVariants> {
+  /**
+   * Set false to render in place instead of a body portal — required when the
+   * sheet's fields must stay inside an enclosing <form> (mobile filters).
+   */
+  portal?: boolean;
+}
 
 function SheetContent({
   side = "right",
   className,
   children,
+  portal = true,
   ...props
 }: SheetContentProps) {
-  return (
-    <SheetPortal>
+  const content = (
+    <>
       <SheetOverlay />
       <SheetPrimitive.Content
         className={cn(sheetVariants({ side }), className)}
@@ -67,8 +74,9 @@ function SheetContent({
           <span className="sr-only">Close</span>
         </SheetPrimitive.Close>
       </SheetPrimitive.Content>
-    </SheetPortal>
+    </>
   );
+  return portal ? <SheetPortal>{content}</SheetPortal> : content;
 }
 
 function SheetHeader({

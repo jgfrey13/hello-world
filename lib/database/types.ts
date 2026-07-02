@@ -9,6 +9,21 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      __migrations: {
+        Row: {
+          applied_at: string;
+          name: string;
+        };
+        Insert: {
+          applied_at?: string;
+          name: string;
+        };
+        Update: {
+          applied_at?: string;
+          name?: string;
+        };
+        Relationships: [];
+      };
       affiliate_clicks: {
         Row: {
           anonymous_session_id: string | null;
@@ -497,6 +512,7 @@ export type Database = {
           ownership_type: string | null;
           price_level: number | null;
           published_at: string | null;
+          search_tsv: unknown;
           slug: string;
           status: Database["public"]["Enums"]["content_status"];
           subscription_tier: Database["public"]["Enums"]["subscription_plan"];
@@ -525,6 +541,7 @@ export type Database = {
           ownership_type?: string | null;
           price_level?: number | null;
           published_at?: string | null;
+          search_tsv?: unknown;
           slug: string;
           status?: Database["public"]["Enums"]["content_status"];
           subscription_tier?: Database["public"]["Enums"]["subscription_plan"];
@@ -553,6 +570,7 @@ export type Database = {
           ownership_type?: string | null;
           price_level?: number | null;
           published_at?: string | null;
+          search_tsv?: unknown;
           slug?: string;
           status?: Database["public"]["Enums"]["content_status"];
           subscription_tier?: Database["public"]["Enums"]["subscription_plan"];
@@ -880,6 +898,7 @@ export type Database = {
           price_is_approximate: boolean;
           price_verified_at: string | null;
           published_at: string | null;
+          search_tsv: unknown;
           shipping_summary: string | null;
           slug: string;
           status: Database["public"]["Enums"]["content_status"];
@@ -914,6 +933,7 @@ export type Database = {
           price_is_approximate?: boolean;
           price_verified_at?: string | null;
           published_at?: string | null;
+          search_tsv?: unknown;
           shipping_summary?: string | null;
           slug: string;
           status?: Database["public"]["Enums"]["content_status"];
@@ -948,6 +968,7 @@ export type Database = {
           price_is_approximate?: boolean;
           price_verified_at?: string | null;
           published_at?: string | null;
+          search_tsv?: unknown;
           shipping_summary?: string | null;
           slug?: string;
           status?: Database["public"]["Enums"]["content_status"];
